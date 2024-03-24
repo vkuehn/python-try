@@ -5,7 +5,7 @@ site_description: This is a template repository for Python projects that use Poe
 site_author: Volker Kuehn
 edit_uri: edit/main/docs/
 repo_name: vkuehn/python-try
-copyright: Maintained by <a href="https://vkuehn.com">Florian</a>.
+copyright: Maintained by <a href="https://github.com/vkuehn/vkuehn">vkuehn</a>.
 
 nav:
   - Home: index.md
@@ -15,9 +15,9 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-            setup_commands:
-                - import sys
-                - sys.path.append('../')
+          setup_commands:
+            - import sys
+            - sys.path.append('../')
 theme:
   name: material
   feature:
