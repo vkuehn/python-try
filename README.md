@@ -26,6 +26,10 @@ git push -u origin main
 Finally, install the environment and the pre-commit hooks with
 
 ```bash
+python3 -m venv .venv
+source ./venv/bin/activate
+pip install -U pip
+pip install -r requierments.txt
 make install
 ```
 
@@ -37,8 +41,6 @@ For activating the automatic documentation with MkDocs, see [here](https://fpgma
 To enable the code coverage reports, see [here](https://fpgmaas.github.io/cookiecutter-poetry/features/codecov/).
 
 ## Releasing a new version
-
-
 
 ---
 

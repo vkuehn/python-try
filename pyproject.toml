@@ -2,7 +2,7 @@
 name = "python_try"
 version = "0.0.1"
 description = "This is a template repository for Python projects that use Poetry for their dependency management."
-authors = ["Volker Kuehn <fvkuehn@more-machines.org>"]
+authors = ["Volker Kuehn <vkuehn@more-machines.org>"]
 repository = "https://github.com/vkuehn/python-try"
 documentation = "https://vkuehn.github.io/python-try/"
 readme = "README.md"
