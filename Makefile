@@ -43,6 +43,10 @@ docs-test: ## Test if documentation can be built without warnings or errors
 docs: ## Build and serve the documentation
 	@poetry run mkdocs serve
 
+.PHONY: docke-build
+docker-build: ## Build Docker container from current project state
+	@docker build -t python-try .
+
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
