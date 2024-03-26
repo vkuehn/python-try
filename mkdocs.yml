@@ -10,14 +10,13 @@ copyright: Maintained by <a href="https://github.com/vkuehn/vkuehn">vkuehn</a>.
 nav:
   - Home: index.md
   - Modules: modules.md
+
 plugins:
   - search
   - mkdocstrings:
       handlers:
         python:
-          setup_commands:
-            - import sys
-            - sys.path.append('../')
+          paths: [python_try]
 theme:
   name: material
   feature:
