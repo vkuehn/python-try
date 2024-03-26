@@ -12,11 +12,11 @@ nav:
   - Modules: modules.md
 
 plugins:
-  - search
   - mkdocstrings:
       handlers:
         python:
-          paths: [python_try]
+          paths: [.] # actually not needed, default
+
 theme:
   name: material
   feature:
