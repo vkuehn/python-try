@@ -3,8 +3,7 @@
 [![Release](https://img.shields.io/badge/release-latest-blue)](https://github.com/vkuehn/python-try/releases/latest)
 [![Build status](https://img.shields.io/github/actions/workflow/status/vkuehn/python-try/main.yml?branch=main)](https://github.com/vkuehn/python-try/actions/workflows/main.yml?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/vkuehn/python-try/branch/main/graph/badge.svg)](https://codecov.io/gh/vkuehn/python-try)
-[![Commit activity](https://img.shields.io/github/commit-activity/m/vkuehn/python-try)](https://img.shields.io/github/commit-activity/m/vkuehn/python-try)
-[![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/vkuehn/python-try/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/vkuehn/python-try/blob/main/LICENSE)
 
 This is a template repository for Python projects that use Poetry for their dependency management.
 It has been generated from the [cookiecutter-poetry](https://fpgmaas.github.io/cookiecutter-poetrycookiecutter-poetry) repo.
@@ -36,7 +35,7 @@ make install
 ```
 
 before actively using make sure you get soon your first minor release version.
-and gihub pages is enabled for your repo in github.com/reponame/settings/pages
+Also that [github pages](https://vkuehn.github.io/python-try/) is enabled for your repo in github.com/reponame/settings/pages
 
 You are now ready to start development on your project!
 The CI/CD pipeline will be triggered when you open a pull request, merge to main, or when you create a new release.
