@@ -1,6 +1,6 @@
 # python-try
 
-[![Release](https://img.shields.io/github/v/release/vkuehn/python-try)](https://img.shields.io/github/v/release/vkuehn/python-try)
+[![Release](https://img.shields.io/github/v/release/vkuehn/python-try)](https://github.com/vkuehn/python-try/releases/latest)
 [![Build status](https://img.shields.io/github/actions/workflow/status/vkuehn/python-try/main.yml?branch=main)](https://github.com/vkuehn/python-try/actions/workflows/main.yml?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/vkuehn/python-try/branch/main/graph/badge.svg)](https://codecov.io/gh/vkuehn/python-try)
 [![Commit activity](https://img.shields.io/github/commit-activity/m/vkuehn/python-try)](https://img.shields.io/github/commit-activity/m/vkuehn/python-try)
