@@ -34,8 +34,14 @@ pip install -r requierments.txt
 make install
 ```
 
-before actively using make sure you get soon your first minor release version.
-Also that [github pages](https://vkuehn.github.io/python-try/) is enabled for your repo in github.com/reponame/settings/pages
+Make sure.
+
+- that [github pages](https://vkuehn.github.io/python-try/) is enabled for your repo in
+  github.com/yourname/reponame/settings/pages.
+- that you may need to give the GITHUB_TOKEN write permission.
+  Go to your repository's Settings > Actions > General > Workflow Permissions and select Read and write permissions.
+- before actively using make sure you get your first minor release version.
+- rename everything python_try to your reponame
 
 You are now ready to start development on your project!
 The CI/CD pipeline will be triggered when you open a pull request, merge to main, or when you create a new release.
