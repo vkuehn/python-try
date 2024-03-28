@@ -61,8 +61,9 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
   - fix README.md
   - run ruff
   - run prettier
-
-more to come once I understand all of it
+- Pipelines
+  - on-release-main - use mkdocs to publish documentation on [GitPages](https://vkuehn.github.io/python-try/)
+    more to come once I understand all of it
 
 # ToDo
 
