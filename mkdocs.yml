@@ -15,6 +15,9 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          options:
+            show_source: false
+            show_submodules: true
           paths: [.] # actually not needed, default
 
 theme:
