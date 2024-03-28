@@ -7,6 +7,8 @@
 [![License](https://img.shields.io/github/license/vkuehn/python-try)](https://img.shields.io/github/license/vkuehn/python-try)
 
 This is a template repository for Python projects that use Poetry for their dependency management.
+It has been generated from the [cookiecutter-poetry](https://fpgmaas.github.io/cookiecutter-poetrycookiecutter-poetry) repo.
+Unfortunately it is not maintained anymore. Therefore, this repo.
 
 - **Github repository**: <https://github.com/vkuehn/python-try/>
 - **Documentation** <https://vkuehn.github.io/python-try/>
@@ -33,15 +35,18 @@ pip install -r requierments.txt
 make install
 ```
 
+before actively using make sure you get soon your first minor release version.
+and gihub pages is enabled for your repo in github.com/reponame/settings/pages
+
 You are now ready to start development on your project!
 The CI/CD pipeline will be triggered when you open a pull request, merge to main, or when you create a new release.
 
+# ToDo
+
+these from the original repo do not yet work
 To finalize the set-up for publishing to PyPi or Artifactory, see [here](https://fpgmaas.github.io/cookiecutter-poetry/features/publishing/#set-up-for-pypi).
-For activating the automatic documentation with MkDocs, see [here](https://fpgmaas.github.io/cookiecutter-poetry/features/mkdocs/#enabling-the-documentation-on-github).
 To enable the code coverage reports, see [here](https://fpgmaas.github.io/cookiecutter-poetry/features/codecov/).
 
 ## Releasing a new version
 
 ---
-
-Repository initiated with [fpgmaas/cookiecutter-poetry](https://github.com/fpgmaas/cookiecutter-poetry).
