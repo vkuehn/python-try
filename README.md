@@ -46,6 +46,24 @@ Make sure.
 You are now ready to start development on your project!
 The CI/CD pipeline will be triggered when you open a pull request, merge to main, or when you create a new release.
 
+# Features
+
+- see makefile for options during development
+  - mkdocs generates source code documentation see mkdocs.yml
+  - poetry builds project and dependencies
+- pre commit hook see .pre-commit-config.yaml
+  - case conflict
+  - merge conflicts
+  - check toml
+  - check yaml
+  - fix end of files
+  - trim trailing whitespaces
+  - fix README.md
+  - run ruff
+  - run prettier
+
+more to come once I understand all of it
+
 # ToDo
 
 these from the original repo do not yet work
