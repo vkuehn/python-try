@@ -67,6 +67,12 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 
 # ToDo
 
+Makefile
+
+- venv for project
+- venv for poetry (according to documentation should be separated)
+  - https://python-poetry.org/docs/#installing-manually
+
 these from the original repo do not yet work
 To finalize the set-up for publishing to PyPi or Artifactory, see [here](https://fpgmaas.github.io/cookiecutter-poetry/features/publishing/#set-up-for-pypi).
 To enable the code coverage reports, see [here](https://fpgmaas.github.io/cookiecutter-poetry/features/codecov/).
