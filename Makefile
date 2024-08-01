@@ -1,17 +1,10 @@
-.PHONY: install
-install: ## Install the poetry environment and install the pre-commit hooks
-	@echo "🚀 Creating virtual environment using pyenv and poetry"
-	@poetry install
-	@poetry run pre-commit install
-	@poetry shell
-
-.PHONY: update
-update: ## Run update of dependencies
-	@echo "🚀 Updating Poetry lock file 'pyproject.lock': Running poetry update"
-	@poetry update
+.PHONY: build
+build: clean-build ## Build wheel file using poetry
+	@echo "🚀 Creating wheel file"
+	@poetry build
 
 .PHONY: check
-check: ## Run code quality tools.
+check: ## Run code quality tools and project checks.
 	@echo "🚀 Checking Poetry lock file consistency with 'pyproject.toml': Running poetry lock --check"
 	@poetry check --lock
 	@echo "🚀 Linting code: Running pre-commit"
@@ -20,16 +13,14 @@ check: ## Run code quality tools.
 	@poetry run mypy
 	@echo "🚀 Checking for obsolete dependencies: Running deptry"
 	@poetry run deptry .
-
-.PHONY: test
-test: ## Test the code with pytest
-	@echo "🚀 Testing code: Running pytest"
-	@poetry run pytest --cov --cov-config=pyproject.toml --cov-report=xml
-
-.PHONY: build
-build: clean-build ## Build wheel file using poetry
-	@echo "🚀 Creating wheel file"
-	@poetry build
+	@echo "🚀 Checking for latest version for dependencies"
+	@poetry show --latest --top-level
+	@echo "🚀 Checking poetry venvs"
+	@poetry env list
+	@echo "🚀 poetry config"
+	@poetry config --list
+	@echo "🚀 poetry version"
+	@poetry about
 
 .PHONY: clean-build
 clean-build: ## clean build artifacts
@@ -43,9 +34,33 @@ docs-test: ## Test if documentation can be built without warnings or errors
 docs: ## Build and serve the documentation
 	@poetry run mkdocs serve
 
-.PHONY: docke-build
+.PHONY: docker-build
 docker-build: ## Build Docker container from current project state
 	@docker build -t python-try .
+
+.PHONY: install
+install: ## Install the poetry environment and install the pre-commit hooks
+	@echo "🚀 Creating virtual environment using pyenv and poetry"
+	@poetry install
+	@poetry run pre-commit install
+	@poetry shell
+
+.PHONY: update
+update: ## Run update of dependencies
+	@echo "🚀 Updating project with Poetry"
+	@rm poetry.lock
+	@poetry self update
+	@poetry update
+
+.PHONY: update-check
+update-check: ## Check if updates have conflicting dependencies
+	@echo "🚀 Check if updates have conflicting dependencies"
+	@poetry update --dry-run
+
+.PHONY: test
+test: ## Test the code with pytest
+	@echo "🚀 Testing code: Running pytest"
+	@poetry run pytest --cov --cov-config=pyproject.toml --cov-report=xml
 
 .PHONY: help
 help:
