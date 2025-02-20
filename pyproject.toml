@@ -43,7 +43,7 @@ testpaths = ["tests"]
 target-version = "py37"  # Consider updating to a more recent version like "py311"
 line-length = 120
 fix = true
-select = [
+lint.select = [
     "YTT",  # flake8-2020
     "S",    # flake8-bandit
     "B",    # flake8-bugbear
@@ -60,7 +60,7 @@ select = [
     "RUF",  # ruff
     "TRY",  # tryceratops
 ]
-ignore = [
+lint.ignore = [
     "E501",  # LineTooLong
     "E731",  # DoNotAssignLambda
 ]
@@ -75,7 +75,7 @@ skip_empty = true
 branch = true
 source = ["python_try"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101"]
 [tool.poetry.dependencies]
 ruff = "^0.9.4"
