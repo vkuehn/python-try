@@ -11,8 +11,6 @@ check: ## Run code quality tools and project checks.
 	@poetry run pre-commit run -a
 	@echo "🚀 Static type checking: Running mypy"
 	@poetry run mypy
-	@echo "🚀 Checking for obsolete dependencies: Running deptry"
-	@poetry run deptry .
 	@echo "🚀 Checking for latest version for dependencies"
 	@poetry show --latest --top-level
 	@echo "🚀 Checking poetry venvs"
