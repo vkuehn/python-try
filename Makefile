@@ -49,17 +49,12 @@ update: ## Run update of dependencies
 	@rm poetry.lock
 	@poetry self update
 	@poetry update
+	@tox
 
 .PHONY: update-check
 update-check: ## Check if updates have conflicting dependencies
 	@echo "🚀 Check if updates have conflicting dependencies"
 	@poetry update --dry-run
-
-.PHONY: update-requirements
-update-requirements: ## Update requirements.txt from poetry.lock using tox and user tools
-	@echo "Updating requirements.txt from poetry.lock..."
-	@poetry export -f requirements.txt --output requirements.txt --without-hashes
-	@tox -e requirements
 
 .PHONY: test
 test: ## Test the code with pytest

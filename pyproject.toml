@@ -11,23 +11,18 @@ requires-python = ">=3.12,<4.0"
 dependencies = [
     "ruff >= 0.9.7",
     "pre-commit (>=4.1.0,<5.0.0)",
+    "pytest (>=8.3.4,<9.0.0)",
+    "pytest-cov (>=6.0.0,<7.0.0)",
+    "mkdocs (>=1.6.1,<2.0.0)",
+    "mkdocs-material (>=9.6.5,<10.0.0)",
+    "mkdocstrings (>=0.28.2,<0.29.0)",
+    "tox (>=4.24.1,<5.0.0)",
     "mypy (>=1.15.0,<2.0.0)",
-    "deptry (>=0.23.0,<0.24.0)"
 ]
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.dependencies]
-pytest = "^8.3.2"
-pytest-cov = "^5.0.0"
-mypy = "^1.11.1"
-pre-commit = "^4.1.0"
-tox = "^4.16.0"
-mkdocs = "^1.6.0"
-mkdocs-material = "^9.5.30"
-mkdocstrings = { extras = ["python"], version = "^0.25.2" }
 
 [tool.mypy]
 files = ["python_try"]

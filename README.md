@@ -30,7 +30,7 @@ Finally, install the environment and the pre-commit hooks with
 python3 -m venv .venv
 source ./venv/bin/activate
 pip install -U pip
-pip install -r requierments.txt
+pip install .
 make install
 ```
 
