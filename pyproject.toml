@@ -1,7 +1,7 @@
 [project]
 name = "python_try"
 version = "0.0.1"
-description = "This is a template repository for Python projects that use Poetry for their dependency management."
+description = "This is a template repository for Python projects"
 authors = [{"name" = "Volker Kuehn", "email" = "vkuehn@more-machines.org"}] # Correct string format
 repository = "https://github.com/vkuehn/python-try"
 documentation = "https://vkuehn.github.io/python-try/"
@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"] #  Consider "^1.5.0" or latest
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
