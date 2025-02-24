@@ -7,11 +7,12 @@ repository = "https://github.com/vkuehn/python-try"
 documentation = "https://vkuehn.github.io/python-try/"
 readme = "README.md"
 packages = [{ include = "python_try" }]
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0"
 dependencies = [
     "ruff >= 0.9.7",
     "pre-commit (>=4.1.0,<5.0.0)",
-    "mypy (>=1.15.0,<2.0.0)"
+    "mypy (>=1.15.0,<2.0.0)",
+    "deptry (>=0.23.0,<0.24.0)"
 ]
 
 [build-system]
