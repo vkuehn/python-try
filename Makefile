@@ -28,9 +28,13 @@ clean-build: ## clean build artifacts
 docs-test: ## Test if documentation can be built without warnings or errors
 	@poetry run mkdocs build -s
 
-.PHONY: docs
-docs: ## Build and serve the documentation
+.PHONY: docs-serve
+docs-serve: ## Build and serve the documentation
 	@poetry run mkdocs serve
+
+.PHONY: docs
+docs: ## Build the documentation
+	@poetry run mkdocs build
 
 .PHONY: docker-build
 docker-build: ## Build Docker container from current project state
@@ -41,7 +45,6 @@ install: ## Install the poetry environment and install the pre-commit hooks
 	@echo "🚀 Creating virtual environment using pyenv and poetry"
 	@poetry install
 	@poetry run pre-commit install
-	@poetry shell
 
 .PHONY: update
 update: ## Run update of dependencies
@@ -59,7 +62,7 @@ update-check: ## Check if updates have conflicting dependencies
 .PHONY: test
 test: ## Test the code with pytest
 	@echo "🚀 Testing code: Running pytest"
-	@poetry run pytest --cov --cov-config=pyproject.toml --cov-report=xml
+	@poetry run pytest --cov --cov-config=pyproject.toml --cov-report=html
 
 .PHONY: help
 help:
