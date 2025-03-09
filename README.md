@@ -9,7 +9,7 @@ This is a template repository for Python projects that use Poetry for their depe
 It has been generated from the [cookiecutter-poetry](https://fpgmaas.github.io/cookiecutter-poetrycookiecutter-poetry) repo.
 Unfortunately it is not maintained anymore. Therefore, this repo.
 
-- **Github repository**: <https://github.com/vkuehn/python-try/>
+- **GitHub repository**: <https://github.com/vkuehn/python-try/>
 - **Documentation** <https://vkuehn.github.io/python-try/>
 
 ## Getting started with your project
@@ -36,12 +36,12 @@ make install
 
 Make sure.
 
-- that [github pages](https://vkuehn.github.io/python-try/) is enabled for your repo in
-  github.com/yourname/reponame/settings/pages.
+- that [GitHub pages](https://vkuehn.github.io/python-try/) is enabled for your repo in
+  github.com/your name/repo name/settings/pages.
 - that you may need to give the GITHUB_TOKEN write permission.
   Go to your repository's Settings > Actions > General > Workflow Permissions and select Read and write permissions.
 - before actively using make sure you get your first minor release version.
-- rename everything python_try to your reponame
+- rename everything python_try to your repo name
 
 You are now ready to start development on your project!
 The CI/CD pipeline will be triggered when you open a pull request, merge to main, or when you create a new release.

@@ -10,7 +10,7 @@ def foo(bar: str) -> str:
         str: Description of return value
     """
 
-    return "foo"
+    return f"foo received {bar}"
 
 
 if __name__ == "__main__":  # pragma: no cover
