@@ -159,3 +159,4 @@ cython_debug/
 # ide config files
 .vscode/
 .idea/
+*.DS_Store
