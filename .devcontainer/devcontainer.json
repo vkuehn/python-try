@@ -4,9 +4,6 @@
     "name": "python-try",
     // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
     "image": "mcr.microsoft.com/devcontainers/python:3.12-bookworm",
-    "features": {
-        "ghcr.io/devcontainers-contrib/features/poetry:2": {}
-    },
 
     // Use 'postCreateCommand' to run commands after the container is created.
     "postCreateCommand": "./.devcontainer/postCreateCommand.sh",

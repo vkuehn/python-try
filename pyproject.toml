@@ -2,12 +2,9 @@
 name = "python_try"
 version = "0.0.1"
 description = "This is a template repository for Python projects"
-authors = [{"name" = "Volker Kuehn", "email" = "vkuehn@more-machines.org"}] # Correct string format
-repository = "https://github.com/vkuehn/python-try"
-documentation = "https://vkuehn.github.io/python-try/"
-readme = "README.md"
-packages = [{ include = "python_try" }]
+authors = [{ name = "Volker Kuehn", email = "vkuehn@more-machines.org" }]
 requires-python = ">=3.12,<4.0"
+readme = "README.md"
 dependencies = [
     "ruff >= 0.9.7",
     "pre-commit (>=4.1.0,<5.0.0)",
@@ -19,10 +16,16 @@ dependencies = [
     "tox (>=4.24.1,<5.0.0)",
     "mypy (>=1.15.0,<2.0.0)",
 ]
+documentation = "https://vkuehn.github.io/python-try/"
+repository = "https://github.com/vkuehn/python-try"
+packages = [{ include = "python_try" }]
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.uv]
+package = false
 
 [tool.mypy]
 files = ["python_try"]
