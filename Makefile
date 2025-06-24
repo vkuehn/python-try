@@ -8,9 +8,9 @@ check: ## Run code quality tools and project checks.
 	@echo "🚀 Checking Poetry lock file consistency with 'pyproject.toml': Running poetry lock --check"
 	@poetry check --lock
 	@echo "🚀 Linting code: Running pre-commit"
-	@poetry run pre-commit run -a
+	@pre-commit run -a
 	@echo "🚀 Static type checking: Running mypy"
-	@poetry run mypy
+	@mypy
 	@echo "🚀 Checking for latest version for dependencies"
 	@poetry show --latest --top-level
 	@echo "🚀 Checking poetry venvs"
