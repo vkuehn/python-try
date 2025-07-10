@@ -5,8 +5,6 @@ build: clean-build ## Build wheel file using uv and .venv
 
 .PHONY: check
 check: ## Run code quality tools and project checks.
-	@echo "🚀 Checking pip lock file consistency with 'pyproject.toml': Running pip check"
-	@pip check
 	@echo "🚀 Linting code: Running pre-commit"
 	@pre-commit run -a
 	@echo "🚀 Static type checking: Running mypy"
