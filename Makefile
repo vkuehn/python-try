@@ -5,18 +5,16 @@ build: clean-build ## Build wheel file using uv and .venv
 
 .PHONY: check
 check: ## Run code quality tools and project checks.
-	@echo "🚀 Checking uv lock file consistency with 'pyproject.toml': Running uv pip check"
-	@uv pip check
+	@echo "🚀 Checking pip lock file consistency with 'pyproject.toml': Running pip check"
+	@pip check
 	@echo "🚀 Linting code: Running pre-commit"
-	@uv run pre-commit run -a
+	@pre-commit run -a
 	@echo "🚀 Static type checking: Running mypy"
-	@uv run mypy
+	@mypy
 	@echo "🚀 Checking for latest version for dependencies"
-	@uv pip list --outdated
-	@echo "🚀 Checking uv environments"
-	@uv venv list
-	@echo "🚀 uv version"
-	@uv --version
+	@pip list --outdated
+	@echo "🚀 pip version"
+	@pip --version
 
 .PHONY: clean-build
 clean-build: ## clean build artifacts is needed by build
