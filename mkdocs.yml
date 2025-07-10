@@ -1,7 +1,7 @@
 site_name: python-try
 repo_url: https://github.com/vkuehn/python-try
 site_url: https://vkuehn.github.io/python-try
-site_description: This is a template repository for Python projects that use Poetry for their dependency management.
+site_description: This is a template repository for Python projects that use uv for their dependency management.
 site_author: Volker Kuehn
 edit_uri: edit/main/docs/
 repo_name: vkuehn/python-try
