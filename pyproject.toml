@@ -22,8 +22,8 @@ repository = "https://github.com/vkuehn/python-try"
 packages = [{ include = "python_try" }]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv"]
+build-backend = "uv.build_backend"
 
 [tool.uv]
 package = false

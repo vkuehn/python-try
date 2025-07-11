@@ -5,9 +5,9 @@
 [![codecov](https://codecov.io/gh/vkuehn/python-try/branch/main/graph/badge.svg)](https://codecov.io/gh/vkuehn/python-try)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/vkuehn/python-try/blob/main/LICENSE)
 
-This is a template repository for Python projects that use Poetry for their dependency management.
+This is a template repository for Python projects that use UV for their dependency management.
 It has been generated from the [cookiecutter-poetry](https://fpgmaas.github.io/cookiecutter-poetrycookiecutter-poetry) repo.
-Unfortunately it is not maintained anymore. Therefore, this repo.
+But than change to UV as main tool
 
 - **GitHub repository**: <https://github.com/vkuehn/python-try/>
 - **Documentation** <https://vkuehn.github.io/python-try/>
@@ -50,7 +50,6 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 
 - see makefile for options during development
   - mkdocs generates source code documentation see mkdocs.yml
-  - poetry builds project and dependencies
 - pre commit hook see .pre-commit-config.yaml
   - case conflict
   - merge conflicts
@@ -68,14 +67,9 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 # ToDo
 
 Makefile
-
-- venv for project
-- venv for poetry (according to documentation should be separated)
-  - https://python-poetry.org/docs/#installing-manually
-
-these from the original repo do not yet work
-To finalize the set-up for publishing to PyPi or Artifactory, see [here](https://fpgmaas.github.io/cookiecutter-poetry/features/publishing/#set-up-for-pypi).
-To enable the code coverage reports, see [here](https://fpgmaas.github.io/cookiecutter-poetry/features/codecov/).
+Pipelines
+devcontainer work again
+release scripts
 
 ## Releasing a new version
 
