@@ -5,4 +5,4 @@
 [![codecov](https://codecov.io/gh/vkuehn/python-try/branch/main/graph/badge.svg)](https://codecov.io/gh/vkuehn/python-try)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/vkuehn/python-try/blob/main/LICENSE)
 
-This is a template repository for Python projects that use Poetry for their dependency management.
+This is a template repository for Python projects that use uv for their dependency management.

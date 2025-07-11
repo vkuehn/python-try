@@ -1,68 +1,55 @@
 .PHONY: build
-build: clean-build ## Build wheel file using poetry
+build: clean-build ## Build wheel file using uv and .venv
 	@echo "🚀 Creating wheel file"
-	@poetry build
+	@uv build --out-dir dist/
 
 .PHONY: check
 check: ## Run code quality tools and project checks.
-	@echo "🚀 Checking Poetry lock file consistency with 'pyproject.toml': Running poetry lock --check"
-	@poetry check --lock
 	@echo "🚀 Linting code: Running pre-commit"
-	@poetry run pre-commit run -a
+	@pre-commit run -a
 	@echo "🚀 Static type checking: Running mypy"
-	@poetry run mypy
+	@mypy
 	@echo "🚀 Checking for latest version for dependencies"
-	@poetry show --latest --top-level
-	@echo "🚀 Checking poetry venvs"
-	@poetry env list
-	@echo "🚀 poetry config"
-	@poetry config --list
-	@echo "🚀 poetry version"
-	@poetry about
+	@pip list --outdated
+	@echo "🚀 pip version"
+	@pip --version
 
 .PHONY: clean-build
-clean-build: ## clean build artifacts
+clean-build: ## clean build artifacts is needed by build
+	@echo "🚀 Cleaning build artifacts"
 	@rm -rf dist
 
 .PHONY: docs-test
 docs-test: ## Test if documentation can be built without warnings or errors
-	@poetry run mkdocs build -s
+	@uv run mkdocs build -s
 
 .PHONY: docs-serve
 docs-serve: ## Build and serve the documentation
-	@poetry run mkdocs serve
+	@uv run mkdocs serve
 
 .PHONY: docs
 docs: ## Build the documentation
-	@poetry run mkdocs build
+	@uv run mkdocs build
 
 .PHONY: docker-build
 docker-build: ## Build Docker container from current project state
 	@docker build -t python-try .
 
 .PHONY: install
-install: ## Install the poetry environment and install the pre-commit hooks
-	@echo "🚀 Creating virtual environment using pyenv and poetry"
-	@poetry install
-	@poetry run pre-commit install
+install: ## Install the uv environment and install the pre-commit hooks
+	@echo "🚀 Creating virtual environment using uv and installing dependencies"
+	@uv sync
+	@uv run pre-commit install
 
 .PHONY: update
 update: ## Run update of dependencies
-	@echo "🚀 Updating project with Poetry"
-	@rm poetry.lock
-	@poetry self update
-	@poetry update
-	@tox
-
-.PHONY: update-check
-update-check: ## Check if updates have conflicting dependencies
-	@echo "🚀 Check if updates have conflicting dependencies"
-	@poetry update --dry-run
+	@echo "🚀 Updating project with uv"
+	@uv sync --upgrade
 
 .PHONY: test
-test: ## Test the code with pytest
+test: install ## Test the code with pytest (installs dependencies if needed)
 	@echo "🚀 Testing code: Running pytest"
-	@poetry run pytest --cov --cov-config=pyproject.toml --cov-report=html
+	@uv run pytest --cov --cov-config=pyproject.toml --cov-report=html
 
 .PHONY: help
 help:

@@ -2,12 +2,9 @@
 name = "python_try"
 version = "0.0.1"
 description = "This is a template repository for Python projects"
-authors = [{"name" = "Volker Kuehn", "email" = "vkuehn@more-machines.org"}] # Correct string format
-repository = "https://github.com/vkuehn/python-try"
-documentation = "https://vkuehn.github.io/python-try/"
-readme = "README.md"
-packages = [{ include = "python_try" }]
+authors = [{ name = "Volker Kuehn", email = "vkuehn@more-machines.org" }]
 requires-python = ">=3.12,<4.0"
+readme = "README.md"
 dependencies = [
     "ruff >= 0.9.7",
     "pre-commit (>=4.1.0,<5.0.0)",
@@ -18,11 +15,18 @@ dependencies = [
     "mkdocstrings[python] (>=0.28.2,<0.29.0)",
     "tox (>=4.24.1,<5.0.0)",
     "mypy (>=1.15.0,<2.0.0)",
+    "uv>=0.7.20",
 ]
+documentation = "https://vkuehn.github.io/python-try/"
+repository = "https://github.com/vkuehn/python-try"
+packages = [{ include = "python_try" }]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv"]
+build-backend = "uv.build_backend"
+
+[tool.uv]
+package = false
 
 [tool.mypy]
 files = ["python_try"]
@@ -72,6 +76,11 @@ skip_empty = true
 [tool.coverage.run]
 branch = true
 source = ["python_try"]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101"]
