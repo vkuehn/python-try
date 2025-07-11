@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 # Install Dependencies
-poetry install --with dev
+uv pip install -r requirements.txt --upgrade --dev
 
 # Install pre-commit hooks
-poetry run pre-commit install --install-hooks
+uv venv exec pre-commit install --install-hooks
