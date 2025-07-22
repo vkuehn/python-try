@@ -1,0 +1,11 @@
+When writing unit tests, follow these guidelines:
+- Write unit tests with pytest
+- Try to avoid the definition of new classes, types, mocks or SimpleNamespaces. Use the classes from the production code directly.
+- Use the `pytest.mark.parametrize` decorator to run the same test with different inputs.
+- Try to be concise and avoid unnecessary complexity in tests.
+- Use comments only when necessary to clarify the Why? behind the code, not the What? or How? which should be clear from the code itself. Use English as the language for comments.
+- Use types in function signatures to clarify the expected types of parameters and return values.
+- If possible, the unit tests should cover all branches of the code being tested.
+- Mark every unit test with the @unit_test decorator.
+- Avoid annotating each test case with a comment and instead use pytest.param() with the id field to provide a meaningful name for each test case.
+- pytest.parametrize expects argnames which should be given as a tuple of strings, not a single string.
