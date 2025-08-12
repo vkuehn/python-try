@@ -17,3 +17,18 @@ jobs:
 
       - name: Deploy documentation
         run: uv run mkdocs gh-deploy --force
+
+  release-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: uv pip install python-semantic-release
+      - name: Run semantic-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: semantic-release publish
