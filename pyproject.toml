@@ -16,16 +16,17 @@ dependencies = [
     "tox (>=4.24.1,<5.0.0)",
     "mypy (>=1.15.0,<2.0.0)",
 ]
-documentation = "https://vkuehn.github.io/python-try/"
-repository = "https://github.com/vkuehn/python-try"
-packages = [{ include = "python_try" }]
+
+[project.urls]
+Documentation = "https://vkuehn.github.io/python-try/"
+Repository = "https://github.com/vkuehn/python-try"
 
 [build-system]
 requires = ["uv"]
 build-backend = "uv.build_backend"
 
 [tool.uv]
-package = false
+package = true # Enable package management (default is true)
 
 [tool.mypy]
 files = ["python_try"]
