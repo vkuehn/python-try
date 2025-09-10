@@ -7,7 +7,6 @@ requires-python = ">=3.12,<4.0"
 readme = "README.md"
 dependencies = [
     "ruff >= 0.9.7",
-    "pre-commit (>=4.1.0,<5.0.0)",
     "pytest (>=8.3.4,<9.0.0)",
     "pytest-cov (>=6.0.0,<7.0.0)",
     "mkdocs (>=1.6.1,<2.0.0)",
@@ -20,10 +19,6 @@ dependencies = [
 [project.urls]
 Documentation = "https://vkuehn.github.io/python-try/"
 Repository = "https://github.com/vkuehn/python-try"
-
-[build-system]
-requires = ["uv"]
-build-backend = "uv.build_backend"
 
 [tool.uv]
 package = true # Enable package management (default is true)
