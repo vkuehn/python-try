@@ -11,6 +11,8 @@ check: ## Run code quality tools and project checks.
 	@pip list --outdated
 	@echo "🚀 pip version"
 	@pip --version
+	@echo "🚀 Check with Python 3.13 and in the future other versions"
+	@tox -e py313
 
 .PHONY: clean-build
 clean-build: ## clean build artifacts is needed by build
@@ -37,6 +39,8 @@ docker-build: ## Build Docker container from current project state
 install: ## Install the uv environment
 	@echo "🚀 Creating virtual environment using uv and installing dependencies"
 	@uv sync --frozen
+	@echo "🚀 make sure a requirements file exists"
+	@uv pip freeze > requirements.txt
 
 .PHONY: update
 update: ## Run update of dependencies
