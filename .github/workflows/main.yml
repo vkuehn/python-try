@@ -21,6 +21,8 @@ jobs:
         run: uv sync --frozen
       - name: Run tests
         run: uv run pytest
+      - name: Verify mypy installation
+        run: uv pip list | grep mypy
       - name: Run checks
         run: make check
 
