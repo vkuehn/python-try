@@ -42,7 +42,6 @@ pyproject-api==1.9.1
 pytest==8.4.2
 pytest-cov==6.3.0
 python-dateutil==2.9.0.post0
--e file:///workspaces/python-try
 pyyaml==6.0.2
 pyyaml-env-tag==1.1
 requests==2.32.5
