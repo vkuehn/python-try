@@ -32,6 +32,7 @@ nodeenv==1.9.1
 packaging==25.0
 paginate==0.5.7
 pathspec==0.12.1
+pip==25.2
 platformdirs==4.4.0
 pluggy==1.6.0
 pre-commit==4.3.0
@@ -41,7 +42,7 @@ pyproject-api==1.9.1
 pytest==8.4.2
 pytest-cov==6.3.0
 python-dateutil==2.9.0.post0
--e file:///Users/volkerkuehn/git2/python-try
+-e file:///workspaces/python-try
 pyyaml==6.0.2
 pyyaml-env-tag==1.1
 requests==2.32.5
