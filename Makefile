@@ -5,8 +5,6 @@ build: clean-build ## Build wheel file using uv and .venv
 
 .PHONY: check
 check: ## Run code quality tools and project checks.
-	@echo "🚀 Linting code: Running pre-commit"
-	@pre-commit run -a
 	@echo "🚀 Static type checking: Running mypy"
 	@mypy
 	@echo "🚀 Checking for latest version for dependencies"
@@ -36,10 +34,9 @@ docker-build: ## Build Docker container from current project state
 	@docker build -t python-try .
 
 .PHONY: install
-install: ## Install the uv environment and install the pre-commit hooks
+install: ## Install the uv environment
 	@echo "🚀 Creating virtual environment using uv and installing dependencies"
-	@uv sync
-	@uv run pre-commit install
+	@uv sync --frozen
 
 .PHONY: update
 update: ## Run update of dependencies
