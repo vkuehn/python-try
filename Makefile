@@ -21,15 +21,15 @@ clean-build: ## clean build artifacts is needed by build
 
 .PHONY: docs-test
 docs-test: ## Test if documentation can be built without warnings or errors
-	@uv run mkdocs build -s
+	@mkdocs build -s
 
 .PHONY: docs-serve
 docs-serve: ## Build and serve the documentation
-	@uv run mkdocs serve
+	@mkdocs serve
 
 .PHONY: docs
 docs: ## Build the documentation
-	@uv run mkdocs build
+	@mkdocs build
 
 .PHONY: docker-build
 docker-build: ## Build Docker container from current project state
