@@ -1,27 +1,22 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
+set -e  # Exit on any error
 
-set -euo pipefail
+echo "Installing uv..."
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Ensure we're in the right directory
-cd "$(dirname "$0")/.."
+# Add to PATH and reload shell environment
+export PATH="/root/.local/bin:$PATH"
 
-install_uv() {
-    echo "Installing uv..."
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-
-    # Add to PATH and reload shell environment
-    export PATH="/root/.local/bin:$PATH"
-
-    # Try direct execution from the installed location
-    if [ -x "/root/.local/bin/uv" ]; then
-        echo "UV executable found at /root/.local/bin/uv"
-        /root/.local/bin/uv --version
-        return 0
-    else
-        echo "Error: UV executable not found after installation"
-        return 1
-    fi
-}
+# Verify installation
+if [ -x "/root/.local/bin/uv" ]; then
+    echo "UV executable found at /root/.local/bin/uv"
+    /root/.local/bin/uv --version
+else
+    echo "Error: UV executable not found after installation"
+    exit 1
+fi
 
 # Install Dependencies
-uv sync
+echo "Syncing dependencies..."
+uv sync --frozen
+echo "Dependencies synced successfully!"
