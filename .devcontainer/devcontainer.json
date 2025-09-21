@@ -7,7 +7,6 @@
 
     // Use 'postCreateCommand' to run commands after the container is created.
     "postCreateCommand": [
-        "./.devcontainer/install-uv.sh",
         "./.devcontainer/postCreateCommand.sh"
     ],
 
