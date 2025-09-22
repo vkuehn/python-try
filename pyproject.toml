@@ -15,6 +15,7 @@ dependencies = [
     "tox>=4.15.0,<5.0.0",
     "mypy>=1.10.0,<2.0.0",
     "pip>=24.0",
+    "mkdocs-autorefs>=1.4.3",
 ]
 
 [project.urls]

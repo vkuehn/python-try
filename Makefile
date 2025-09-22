@@ -6,13 +6,13 @@ build: clean-build ## Build wheel file using uv and .venv
 .PHONY: check
 check: ## Run code quality tools and project checks.
 	@echo "🚀 Static type checking: Running mypy"
-	@mypy
+	@uv run mypy
 	@echo "🚀 Checking for latest version for dependencies"
-	@pip list --outdated
+	@uv run pip list --outdated
 	@echo "🚀 pip version"
-	@pip --version
+	@uv run pip --version
 	@echo "🚀 Check with Python 3.13 and in the future other versions"
-	@tox -e py313
+	@uv run tox -e py313
 
 .PHONY: clean-build
 clean-build: ## clean build artifacts is needed by build
@@ -21,7 +21,7 @@ clean-build: ## clean build artifacts is needed by build
 
 .PHONY: docs-test
 docs-test: ## Test if documentation can be built without warnings or errors
-	@mkdocs build -s
+	@uv run mkdocs build -s
 
 .PHONY: docs-serve
 docs-serve: ## Build and serve the documentation
@@ -29,7 +29,7 @@ docs-serve: ## Build and serve the documentation
 
 .PHONY: docs
 docs: ## Build the documentation
-	@mkdocs build
+	@uv run mkdocs build
 
 .PHONY: docker-build
 docker-build: ## Build Docker container from current project state

@@ -12,6 +12,7 @@ nav:
   - Modules: modules.md
 
 plugins:
+  - autorefs
   - mkdocstrings:
       handlers:
         python:
