@@ -5,14 +5,14 @@ build: clean-build ## Build wheel file using uv and .venv
 
 .PHONY: check
 check: ## Run code quality tools and project checks.
-	@echo "🚀 Linting code: Running pre-commit"
-	@pre-commit run -a
 	@echo "🚀 Static type checking: Running mypy"
-	@mypy
+	@uv run mypy
 	@echo "🚀 Checking for latest version for dependencies"
-	@pip list --outdated
+	@uv run pip list --outdated
 	@echo "🚀 pip version"
-	@pip --version
+	@uv run pip --version
+	@echo "🚀 Check with Python 3.13 and in the future other versions"
+	@uv run tox -e py313
 
 .PHONY: clean-build
 clean-build: ## clean build artifacts is needed by build
@@ -25,7 +25,7 @@ docs-test: ## Test if documentation can be built without warnings or errors
 
 .PHONY: docs-serve
 docs-serve: ## Build and serve the documentation
-	@uv run mkdocs serve
+	@mkdocs serve
 
 .PHONY: docs
 docs: ## Build the documentation
@@ -36,10 +36,11 @@ docker-build: ## Build Docker container from current project state
 	@docker build -t python-try .
 
 .PHONY: install
-install: ## Install the uv environment and install the pre-commit hooks
+install: ## Install the uv environment
 	@echo "🚀 Creating virtual environment using uv and installing dependencies"
-	@uv sync
-	@uv run pre-commit install
+	@uv sync --frozen
+	@echo "🚀 make sure a requirements file exists"
+	@uv pip freeze > requirements.txt
 
 .PHONY: update
 update: ## Run update of dependencies

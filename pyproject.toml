@@ -1,31 +1,30 @@
 [project]
 name = "python_try"
-version = "0.0.1"
+version = "0.0.2"
 description = "This is a template repository for Python projects"
 authors = [{ name = "Volker Kuehn", email = "vkuehn@more-machines.org" }]
-requires-python = ">=3.12,<4.0"
+requires-python = ">=3.13,<4.0"
 readme = "README.md"
 dependencies = [
-    "ruff >= 0.9.7",
-    "pre-commit (>=4.1.0,<5.0.0)",
-    "pytest (>=8.3.4,<9.0.0)",
-    "pytest-cov (>=6.0.0,<7.0.0)",
-    "mkdocs (>=1.6.1,<2.0.0)",
-    "mkdocs-material (>=9.6.5,<10.0.0)",
-    "mkdocstrings[python] (>=0.28.2,<0.29.0)",
-    "tox (>=4.24.1,<5.0.0)",
-    "mypy (>=1.15.0,<2.0.0)",
+    "ruff>=0.4.8,<0.5.0",
+    "pytest>=8.2.2,<9.0.0",
+    "pytest-cov>=5.0.0,<6.0.0",
+    "mkdocs>=1.6.1,<2.0.0",
+    "mkdocs-material>=9.5.21,<10.0.0",
+    "mkdocstrings[python]>=0.25.0,<0.26.0",
+    "tox>=4.15.0,<5.0.0",
+    "mypy>=1.10.0,<2.0.0",
+    "pip>=24.0",
+    "mkdocs-autorefs>=1.4.3",
+    "tox-uv>=1.28.0",
 ]
-documentation = "https://vkuehn.github.io/python-try/"
-repository = "https://github.com/vkuehn/python-try"
-packages = [{ include = "python_try" }]
 
-[build-system]
-requires = ["uv"]
-build-backend = "uv.build_backend"
+[project.urls]
+Documentation = "https://vkuehn.github.io/python-try/"
+Repository = "https://github.com/vkuehn/python-try"
 
 [tool.uv]
-package = false
+package = true # Enable package management (default is true)
 
 [tool.mypy]
 files = ["python_try"]
@@ -90,3 +89,6 @@ dev = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101"]
+
+[tool.setuptools]
+packages = ["python_try"]
