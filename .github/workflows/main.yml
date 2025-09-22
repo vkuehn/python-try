@@ -24,7 +24,7 @@ jobs:
       - name: Verify mypy installation
         run: uv pip list | grep mypy
       - name: Run checks
-        run: uv run make check
+        run: make check
 
   tox:
     runs-on: ubuntu-latest
