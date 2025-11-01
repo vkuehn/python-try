@@ -16,6 +16,8 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          # Use Google-style docstrings for rendered API docs
+          docstring_style: google
           options:
             show_source: false
             show_submodules: true
