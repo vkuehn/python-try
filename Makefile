@@ -46,6 +46,8 @@ install: ## Install the uv environment
 update: ## Run update of dependencies
 	@echo "🚀 Updating project with uv"
 	@uv sync --upgrade
+	@echo "🚀 make sure a requirements is upgraded also"
+	@uv pip freeze --exclude-editable > requirements.txt
 
 .PHONY: test
 test: install ## Test the code with pytest (installs dependencies if needed)
