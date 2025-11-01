@@ -50,18 +50,11 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 
 # Features
 
-- see makefile for options during development
-  - mkdocs generates source code documentation see mkdocs.yml
+- makefile with handy options during development
+- mkdocs generates source code documentation see mkdocs.yml
 - pre commit hook see .pre-commit-config.yaml
-  - case conflict
-  - merge conflicts
-  - check toml
-  - check yaml
-  - fix end of files
-  - trim trailing whitespaces
-  - fix README.md
-  - run ruff
-  - run prettier
+- ruff
+- scripts folder collecting some helper function
 - Pipelines
   - on-release-main
   - - use mkdocs to publish documentation on [GitPages](https://vkuehn.github.io/python-try/)
@@ -69,10 +62,12 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 
 # ToDo
 
-Makefile
-Pipelines
-devcontainer work again
+Pipelines stable in all situations
 release scripts
+
+# Devcontainer
+ run devcontainer locally
+ podman run -it --rm -v "$(pwd):/workspaces/python-try:Z" -w /workspaces/python-try mcr.microsoft.com/devcontainers/python:3.13-trixie bash
 
 ## Releasing a new version
 
