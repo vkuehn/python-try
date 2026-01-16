@@ -16,17 +16,16 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          # Use Google-style docstrings for rendered API docs
-          docstring_style: google
           options:
+            docstring_style: google
             show_source: false
             show_submodules: true
           paths: [.] # actually not needed, default
 
 theme:
   name: material
-  feature:
-    tabs: true
+  features:
+    - navigation.tabs
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -53,6 +52,7 @@ extra:
       link: https://pypi.org/project/python-try
 
 markdown_extensions:
+  - attr_list
   - toc:
       permalink: true
   - pymdownx.arithmatex:

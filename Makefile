@@ -1,24 +1,12 @@
 .PHONY: build
 build: clean-build ## Build wheel file using uv and .venv
 	@echo "🚀 Creating wheel file"
-	@uv build --out-dir dist/
+	@uv run tox -e build
 
 .PHONY: check
 check: ## Run code quality tools and project checks.
-	@echo "🚀 Static type checking: Running mypy"
-	@uv run mypy
-	@echo "🚀 Checking for latest version for dependencies"
-	@uv run pip list --outdated
-	@echo "🚀 pip version"
-	@uv run pip --version
-	@echo "🚀 Linting code: Running ruff formatting and linting"
-	@uv run ruff format ./python_try ./tests
-	@uv run ruff check --fix ./python_try ./tests
-	@echo "🚀 Checking code style with mypy and pylint"
-	@uv run mypy python_try tests
-	@uv run pylint python_try tests
-	@echo "🚀 Check with Python 3.13 and in the future other versions"
-	@uv run tox -e py313
+	@echo "🚀 Running checks via tox (uv.lock)"
+	@uv run tox -e outdated,fix,lint,type,py314
 
 .PHONY: clean-build
 clean-build: ## clean build artifacts is needed by build
@@ -27,7 +15,7 @@ clean-build: ## clean build artifacts is needed by build
 
 .PHONY: docs-test
 docs-test: ## Test if documentation can be built without warnings or errors
-	@uv run mkdocs build -s
+	@uv run tox -e docs-test
 
 .PHONY: docs-serve
 docs-serve: ## Build and serve the documentation
@@ -35,7 +23,7 @@ docs-serve: ## Build and serve the documentation
 
 .PHONY: docs
 docs: ## Build the documentation
-	@uv run mkdocs build
+	@uv run tox -e docs
 
 .PHONY: docker-build
 docker-build: ## Build Docker container from current project state
@@ -62,8 +50,8 @@ update: ## Run update of dependencies
 
 .PHONY: test
 test: install ## Test the code with pytest (installs dependencies if needed)
-	@echo "🚀 Testing code: Running pytest"
-	@uv run pytest --cov --cov-config=pyproject.toml --cov-report=html
+	@echo "🚀 Testing via tox (uv.lock)"
+	@uv run tox -e py314
 
 .PHONY: help
 help:
