@@ -8,7 +8,7 @@ try_batch
 [![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/vkuehn/python-try/blob/main/LICENSE)
 
 This is a template repository for Python projects that use UV for their dependency management.
-It has been generated from the [cookiecutter-poetry](https://fpgmaas.github.io/cookiecutter-poetrycookiecutter-poetry) repo.
+It has been generated from the [cookiecutter-poetry](https://fpgmaas.github.io/cookiecutter-poetry) repo.
 But than change to UV as main tool
 
 - **GitHub repository**: <https://github.com/vkuehn/python-try/>
@@ -67,7 +67,7 @@ release scripts
 
 # Devcontainer
  run devcontainer locally
- podman run -it --rm -v "$(pwd):/workspaces/python-try:Z" -w /workspaces/python-try mcr.microsoft.com/devcontainers/python:3.13-trixie bash
+ podman run -it --rm -v "$(pwd):/workspaces/python-try:Z" -w /workspaces/python-try mcr.microsoft.com/devcontainers/python:3.14-trixie bash
 
 ## Releasing a new version
 

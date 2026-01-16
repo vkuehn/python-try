@@ -34,11 +34,11 @@ install: ## Install the uv environment
 	@echo "🚀 Creating virtual environment using uv and installing dependencies"
 	@uv sync --frozen
 	@echo "🚀 make sure a requirements file exists"
-	@uv pip freeze --exclude-editable > requirements.txt
+	@uv export --format requirements.txt --frozen --no-hashes --no-emit-project --output-file requirements.txt
 	@uv run pre-commit install
 	@echo "🚀 Setting up git hooks"
 	@uv run pre-commit install-hooks
-	@uv run ./scripts/setup_hook_commit_messag.py
+	@uv run ./scripts/setup_hook_commit_message.py
 
 
 .PHONY: update
@@ -46,7 +46,7 @@ update: ## Run update of dependencies
 	@echo "🚀 Updating project with uv"
 	@uv sync --upgrade
 	@echo "🚀 make sure a requirements is upgraded also"
-	@uv pip freeze --exclude-editable > requirements.txt
+	@uv export --format requirements.txt --frozen --no-hashes --no-emit-project --output-file requirements.txt
 
 .PHONY: test
 test: install ## Test the code with pytest (installs dependencies if needed)
