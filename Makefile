@@ -29,6 +29,10 @@ docs: ## Build the documentation
 docker-build: ## Build Docker container from current project state
 	@docker build -t python-try .
 
+.PHONY: init-project
+init-project: ## Nuke old git history and start a fresh project with new origin
+	@uv run python scripts/init_new_project.py
+
 .PHONY: install
 install: ## Install the uv environment
 	@echo "🚀 Creating virtual environment using uv and installing dependencies"
