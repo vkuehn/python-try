@@ -61,6 +61,9 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 
 # ToDo
 
+- remove python-try references in code and docs and replace with new project name
+  - update scripts/init_new_project.py accordingly
+  - test with gitlab
 - Ensure pipelines are stable in all situations
 - Refine release scripts
 
