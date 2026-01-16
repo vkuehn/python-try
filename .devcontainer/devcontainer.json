@@ -3,7 +3,7 @@
 {
     "name": "python-try",
     // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-    "image": "mcr.microsoft.com/devcontainers/python:3.13-trixie",
+    "image": "mcr.microsoft.com/devcontainers/python:3.14-bookworm",
 
     // Use 'postCreateCommand' to run commands after the container is created.
     "postCreateCommand": [

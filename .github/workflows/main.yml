@@ -20,16 +20,14 @@ jobs:
         run: uv python install
       - name: Install dependencies
         run: uv sync --frozen
-      - name: Run tests
-        run: uv run pytest
-      - name: Verify mypy installation
-        run: uv pip list | grep mypy
+      - name: Run checks via tox (uv.lock)
+        run: uv run tox -e lint,type,py314
 
   check-docs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.13"]
+        python-version: ["3.14"]
     steps:
       - name: Check out
         uses: actions/checkout@v4
@@ -39,6 +37,5 @@ jobs:
         run: uv python install
       - name: Install dependencies
         run: uv sync --frozen
-
-      - name: Check if documentation can be built
-        run: uv run mkdocs build
+      - name: Check if documentation can be built (strict)
+        run: uv run tox -e docs-test

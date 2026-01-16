@@ -3,7 +3,7 @@ name = "python_try"
 version = "0.0.2"
 description = "This is a template repository for Python projects"
 authors = [{ name = "Volker Kuehn", email = "vkuehn@more-machines.org" }]
-requires-python = ">=3.13,<4.0"
+requires-python = ">=3.14,<4.0"
 readme = "README.md"
 dependencies = [
     "ruff>=0.4.8,<0.5.0",
@@ -11,7 +11,7 @@ dependencies = [
     "pytest-cov>=5.0.0,<6.0.0",
     "mkdocs>=1.6.1,<2.0.0",
     "mkdocs-material>=9.5.21,<10.0.0",
-    "mkdocstrings[python]>=0.25.0,<0.26.0",
+    "mkdocstrings[python]>=1.0.0,<2.0.0",
     "tox>=4.15.0,<5.0.0",
     "mypy>=1.10.0,<2.0.0",
     "pip>=24.0",
@@ -41,7 +41,7 @@ show_error_codes = true
 testpaths = ["tests"]
 
 [tool.ruff]
-target-version = "py37"  # Consider updating to a more recent version like "py311"
+target-version = "py313"  # Consider updating to a more recent version like "py311"
 line-length = 120
 fix = true
 lint.select = [
