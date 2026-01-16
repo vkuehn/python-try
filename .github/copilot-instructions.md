@@ -32,6 +32,7 @@ Prefer using existing repo commands:
 
 - Keep changes minimal and focused on the user request.
 - Match existing style (ruff formatting, line length 120).
+- For major changes (especially breaking changes), use Conventional Commits so release tooling can infer version bumps (e.g., `feat!: ...` / `BREAKING CHANGE: ...`).
 - Add type hints for new/changed public functions; keep mypy happy.
 - Use Google-style docstrings where docstrings are present/expected.
 - Avoid adding new dependencies unless explicitly requested.
