@@ -27,8 +27,17 @@ def update_project_metadata(project_root: Path, new_name: str) -> None:
     if pyproject.exists():
         print(f"📝 Updating project name in pyproject.toml to '{new_name}'...")
         content = pyproject.read_text(encoding="utf-8")
-        # Replaces 'name = "..." ' in the [project] section
-        new_content = re.sub(r'^name\s*=\s*".*?"', f'name = "{new_name}"', content, flags=re.MULTILINE)
+        # Replace name in [project] section with proper TOML format
+        new_content = re.sub(
+            r'(^\[project\].*?^name\s*=\s*)"[^"]*"',
+            rf'\1"{new_name}"',
+            content,
+            count=1,
+            flags=re.MULTILINE | re.DOTALL,
+        )
+        if new_content == content:
+            # Fallback: try simpler pattern if the above didn't match
+            new_content = re.sub(r'^name\s*=\s*"[^"]*"', f'name = "{new_name}"', content, count=1, flags=re.MULTILINE)
         pyproject.write_text(new_content, encoding="utf-8")
 
 
