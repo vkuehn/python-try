@@ -1,8 +1,4 @@
-"""Initialize a new project from this template.
-
-This script removes the existing `.git` history and initializes a fresh git
-repository. Optionally, it can attach a new `origin` remote.
-"""
+"""Initialize a new project from this template with rollback safety."""
 
 import shutil
 import subprocess
@@ -11,70 +7,92 @@ from pathlib import Path
 
 
 def _resolve_executable(name: str) -> str:
+    """Resolve an executable path and verify it exists."""
     resolved = shutil.which(name)
-    if resolved is None:
+    if not resolved:
         msg = f"Required executable not found on PATH: {name}"
         raise FileNotFoundError(msg)
-    return resolved
+    return str(Path(resolved).absolute())
+
+
+def _run_cmd(cmd: list[str], cwd: Path) -> None:
+    """Run a subprocess command with fixed security settings."""
+    # shell=False ist Standard, aber explizit sicherer gegen Injection
+    subprocess.run(cmd, cwd=cwd, check=True, shell=False)  # noqa: S603
 
 
 def init_new_project() -> None:
-    """Remove the existing git history and initialize a fresh repository."""
-    project_root = Path(__file__).parent.parent
-    git_dir = project_root / ".git"
+    """Main entry point for project initialization."""
+    project_root: Path = Path(__file__).parent.parent
+    git_dir: Path = project_root / ".git"
+    backup_dir: Path = project_root / ".git_backup"
 
-    git = _resolve_executable("git")
-    uv = _resolve_executable("uv")
+    try:
+        git_path: str = _resolve_executable("git")
+        uv_path: str = _resolve_executable("uv")
+    except FileNotFoundError as e:
+        print(f"❌ Fehler: {e}")
+        sys.exit(1)
 
-    print("⚠️  WARNING: This will delete the entire git history of this project!")
-    print("    It is intended for starting a NEW project from this template.")
-    confirm = input("Are you sure you want to continue? (y/n): ").lower()
-
+    print("⚠️  WARNUNG: Dies wird die gesamte Git-Historie löschen!")
+    confirm: str = input("Fortfahren? (y/n): ").lower()
     if confirm != "y":
-        print("Aborting.")
+        print("Abbruch durch Nutzer.")
         sys.exit(0)
 
-    # 1. Remove old git history
-    if git_dir.exists():
-        print(f"🔥 Removing old git history at {git_dir}...")
+    steps: list[str] = []
+
+    try:
+        # 1. Backup
+        if git_dir.exists():
+            print(f"📦 Erstelle Backup von .git -> {backup_dir.name}...")
+            if backup_dir.exists():
+                shutil.rmtree(backup_dir)
+            git_dir.rename(backup_dir)
+            steps.append("backup_created")
+
+        # 2. Git Init
+        print("🌱 Initialisiere neues Git-Repository...")
+        _run_cmd([git_path, "init", "-b", "main"], cwd=project_root)
+        steps.append("git_inited")
+
+        # 3. Remote
+        new_remote: str = input("🔗 Neuer Git Remote URL (Enter zum Überspringen): ").strip()
+        if new_remote:
+            _run_cmd([git_path, "remote", "add", "origin", new_remote], cwd=project_root)
+            print("✅ Remote gesetzt.")
+
+        # 4. Initial Commit
+        print("💾 Erstelle Initial Commit...")
+        _run_cmd([git_path, "add", "."], cwd=project_root)
+        _run_cmd([git_path, "commit", "-m", "Initial commit from template"], cwd=project_root)
+
+        # 5. Tooling
+        print("🪝  Installiere Hooks und Abhängigkeiten...")
+        _run_cmd([uv_path, "sync", "--frozen"], cwd=project_root)
+        _run_cmd([uv_path, "run", "pre-commit", "install"], cwd=project_root)
+
+        # 6. Cleanup Backup
+        if backup_dir.exists():
+            shutil.rmtree(backup_dir)
+        print("\n✨ Projekt erfolgreich initialisiert!")
+
+    except (subprocess.CalledProcessError, Exception) as e:
+        print(f"\n💥 FEHLER: {e}")
+        _rollback(steps, git_dir, backup_dir)
+        sys.exit(1)
+
+
+def _rollback(steps: list[str], git_dir: Path, backup_dir: Path) -> None:
+    """Revert changes if something went wrong."""
+    print("🔄 Starte Rollback...")
+    if "git_inited" in steps and git_dir.exists():
         shutil.rmtree(git_dir, ignore_errors=True)
 
-    # 2. Initialize new git repo
-    print("🌱 Initializing new git repository...")
-    subprocess.run([git, "init", "-b", "main"], cwd=project_root, check=True)  # noqa: S603
-
-    # 3. Ask for new remote
-    new_remote = input(
-        "🔗 Enter new git remote URL (e.g., git@github.com:user/repo.git) or press Enter to skip: "
-    ).strip()
-
-    if new_remote:
-        subprocess.run([git, "remote", "add", "origin", new_remote], cwd=project_root, check=True)  # noqa: S603
-        print(f"✅ Remote 'origin' set to: {new_remote}")
-    else:
-        print("INFO: Skipping remote setup. You can add it later with 'git remote add origin <url>'")
-
-    # 4. Initial commit
-    print("📦 Creating initial commit...")
-    subprocess.run([git, "add", "."], cwd=project_root, check=True)  # noqa: S603
-    subprocess.run(  # noqa: S603
-        [git, "commit", "-m", "Initial commit from python-try template"],
-        cwd=project_root,
-        check=True,
-    )
-
-    # 5. Re-install hooks (since .git was deleted, hooks are gone)
-    print("🪝  Re-installing git hooks...")
-    # Ensure uv is ready
-    subprocess.run([uv, "sync", "--frozen"], cwd=project_root, check=False)  # noqa: S603
-    subprocess.run([uv, "run", "pre-commit", "install"], cwd=project_root, check=False)  # noqa: S603
-
-    # Re-run your custom hook setup script
-    setup_hook = project_root / "scripts" / "setup_hook_commit_message.py"
-    if setup_hook.exists():
-        subprocess.run([uv, "run", str(setup_hook)], cwd=project_root)  # noqa: S603
-
-    print("\n✨ Project ready! You can now push to your new origin.")
+    if "backup_created" in steps and backup_dir.exists():
+        backup_dir.rename(git_dir)
+        print("✅ Ursprünglicher .git-Ordner wurde wiederhergestellt.")
+    print("\n❌ System ist im Ursprungszustand.")
 
 
 if __name__ == "__main__":
