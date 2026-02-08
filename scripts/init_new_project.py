@@ -1,12 +1,11 @@
 """Initialize a new project from this with rollback safety."""
 
-import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-from .check_git_config import check_git_config
+from check_git_config import check_git_config
 
 
 def _resolve_executable(name: str) -> str:
@@ -23,33 +22,54 @@ def _run_cmd(cmd: list[str], cwd: Path) -> None:
     subprocess.run(cmd, cwd=cwd, check=True, shell=False)  # noqa: S603
 
 
-def update_project_metadata(project_root: Path, new_name: str) -> None:
-    """Updates the project name in pyproject.toml to fix the .venv prompt."""
-    pyproject = project_root / "pyproject.toml"
-    if pyproject.exists():
-        print(f"📝 Updating project name in pyproject.toml to '{new_name}'...")
-        content = pyproject.read_text(encoding="utf-8")
-        # Replace name in [project] section with proper TOML format
-        new_content = re.sub(
-            r'(^\[project\].*?^name\s*=\s*)"[^"]*"',
-            rf'\1"{new_name}"',
-            content,
-            count=1,
-            flags=re.MULTILINE | re.DOTALL,
-        )
-        if new_content == content:
-            # Fallback: try simpler pattern if the above didn't match
-            new_content = re.sub(r'^name\s*=\s*"[^"]*"', f'name = "{new_name}"', content, count=1, flags=re.MULTILINE)
-        pyproject.write_text(new_content, encoding="utf-8")
+def migrate_pyproject(pyproject_path: Path, new_name: str, new_author: str, new_email: str):
+    """Update pyproject.toml with new project name and author info."""
+    if not pyproject_path.exists():
+        return print("❌ pyproject.toml not found.")
+
+    # 1. Read and Identify Old Name
+    lines = pyproject_path.read_text().splitlines()
+    old_name = None
+    for line in lines:
+        if line.startswith('name = "'):
+            old_name = line.split('"')[1]
+            break
+
+    if not old_name:
+        return print("❌ Could not determine old project name.")
+
+    # 2. Reconstruct pyproject.toml line-by-line
+    new_lines = []
+    for line in lines:
+        if line.strip().startswith('name = "'):
+            new_lines.append(f'name = "{new_name}"')
+        elif line.strip().startswith('name = "') and "authors" in "".join(new_lines[-5:]):
+            # This handles the name inside the authors block specifically
+            new_lines.append(f'    {{ name = "{new_author}", email = "{new_email}" }},')
+        elif "email =" in line and "name =" in line and "[" in "".join(new_lines[-2:]):
+            # Simplified author replacement for standard uv init layout
+            new_lines.append(f'authors = [{{ name = "{new_author}", email = "{new_email}" }}]')
+        else:
+            new_lines.append(line)
+
+    pyproject_path.write_text("\n".join(new_lines) + "\n")
+    print("✅ Metadata updated in pyproject.toml")
+
+    # 5. Refresh uv state
+    lock_file = pyproject_path / "uv.lock"
+    if lock_file.exists():
+        lock_file.unlink()
+        print("🗑️  Old lockfile removed. Run 'uv sync' to regenerate.")
 
 
-def init_new_project() -> None:
+def init_new_project(new_author: str, new_email: str) -> None:
     """Main entry point for project initialization."""
     project_root: Path = Path(__file__).parent.parent
     git_dir: Path = project_root / ".git"
     backup_dir: Path = project_root / ".git_backup"
     venv_dir: Path = project_root / ".venv"
     new_project_name: str = project_root.name
+    pyproject_backup_path = project_root / "pyproject.toml.bak"
 
     try:
         git_path: str = _resolve_executable("git")
@@ -76,7 +96,15 @@ def init_new_project() -> None:
             steps.append("git_backup")
 
         # 2. Update metadata (pyproject.toml)
-        update_project_metadata(project_root, new_project_name)
+        pyproject_path = project_root / "pyproject.toml"
+        if not pyproject_path.exists():
+            print("❌ pyproject.toml not found. Cannot update project metadata.")
+            sys.exit(1)
+        else:
+            print("Backing up and updating pyproject.toml metadata...")
+            # copy pyproject.toml to backup before modifying
+            shutil.copy(pyproject_path, pyproject_backup_path)
+        migrate_pyproject(pyproject_path, new_project_name, new_author, new_email)
 
         # 3. Remove old .venv (because of old name in prompt)
         if venv_dir.exists():
@@ -129,7 +157,13 @@ def _rollback(steps: list[str], git_dir: Path, backup_dir: Path) -> None:
 
 if __name__ == "__main__":
     print("🔍 Checking Git configuration...")
-    if not check_git_config():
+    git_config = check_git_config()
+    if not git_config:
         print("❌ Git configuration check failed. Please fix the issues and try again.")
         sys.exit(1)
-    init_new_project()
+    user_name = git_config.get("username")
+    user_email = git_config.get("email")
+    print("✅ Git configuration looks good. using the following:")
+    print(f"👤 Git user.name: {user_name}")
+    print(f"📧 Git user.email: {user_email}")
+    init_new_project(new_author=user_name, new_email=user_email)
