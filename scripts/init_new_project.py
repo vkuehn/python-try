@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from .check_git_config import check_git_config
+
 
 def _resolve_executable(name: str) -> str:
     """Resolve an executable path and verify it exists (Bandit S607 fix)."""
@@ -126,4 +128,8 @@ def _rollback(steps: list[str], git_dir: Path, backup_dir: Path) -> None:
 
 
 if __name__ == "__main__":
+    print("🔍 Checking Git configuration...")
+    if not check_git_config():
+        print("❌ Git configuration check failed. Please fix the issues and try again.")
+        sys.exit(1)
     init_new_project()
