@@ -25,9 +25,9 @@ def update_project_metadata(project_root: Path, new_name: str) -> None:
     """Updates the project name in pyproject.toml to fix the .venv prompt."""
     pyproject = project_root / "pyproject.toml"
     if pyproject.exists():
-        print(f"📝 Aktualisiere Projektname in pyproject.toml auf '{new_name}'...")
+        print(f"📝 Updating project name in pyproject.toml to '{new_name}'...")
         content = pyproject.read_text(encoding="utf-8")
-        # Ersetzt 'name = "..." ' in der [project] Sektion
+        # Replaces 'name = "..." ' in the [project] section
         new_content = re.sub(r'^name\s*=\s*".*?"', f'name = "{new_name}"', content, flags=re.MULTILINE)
         pyproject.write_text(new_content, encoding="utf-8")
 
@@ -44,13 +44,13 @@ def init_new_project() -> None:
         git_path: str = _resolve_executable("git")
         uv_path: str = _resolve_executable("uv")
     except FileNotFoundError as e:
-        print(f"❌ Fehler: {e}")
+        print(f"❌ Error: {e}")
         sys.exit(1)
 
-    print(f"🚀 Initialisiere neues Projekt: '{new_project_name}'")
-    print("⚠️  WARNUNG: Dies wird die Git-Historie und .venv löschen!")
-    if input("Fortfahren? (y/n): ").lower() != "y":
-        print("Abbruch.")
+    print(f"🚀 Initializing project from '{new_project_name}' template")
+    print("⚠️  WARNING: This will delete the Git history and .venv!")
+    if input("Continue? (y/n): ").lower() != "y":
+        print("Aborted.")
         sys.exit(0)
 
     steps: list[str] = []
@@ -58,62 +58,62 @@ def init_new_project() -> None:
     try:
         # 1. Backup Git
         if git_dir.exists():
-            print(f"📦 Backup von .git -> {backup_dir.name}...")
+            print(f"📦 Backing up .git -> {backup_dir.name}...")
             if backup_dir.exists():
                 shutil.rmtree(backup_dir)
             git_dir.rename(backup_dir)
             steps.append("git_backup")
 
-        # 2. Metadaten anpassen (pyproject.toml)
+        # 2. Update metadata (pyproject.toml)
         update_project_metadata(project_root, new_project_name)
 
-        # 3. Alte .venv entfernen (wegen altem Namen im Prompt)
+        # 3. Remove old .venv (because of old name in prompt)
         if venv_dir.exists():
-            print("🧹 Entferne alte virtuelle Umgebung...")
+            print("🧹 Removing old virtual environment...")
             shutil.rmtree(venv_dir)
 
-        # 4. Git neu initialisieren
-        print("🌱 Initialisiere neues Git-Repository...")
+        # 4. Re-initialize Git
+        print("🌱 Initializing new Git repository...")
         _run_cmd([git_path, "init", "-b", "main"], cwd=project_root)
         steps.append("git_inited")
 
-        # 5. Remote setzen
-        remote_url = input("🔗 Neuer Remote URL (Enter zum Überspringen): ").strip()
+        # 5. Set remote
+        remote_url = input("🔗 New remote URL (Enter to skip): ").strip()
         if remote_url:
             _run_cmd([git_path, "remote", "add", "origin", remote_url], cwd=project_root)
 
-        # 6. Initial Commit
-        print("💾 Erstelle Initial Commit...")
+        # 6. Initial commit
+        print("💾 Creating initial commit...")
         _run_cmd([git_path, "add", "."], cwd=project_root)
         _run_cmd([git_path, "commit", "-m", f"Initial commit for {new_project_name}"], cwd=project_root)
 
-        # 7. Environment & Hooks neu aufbauen
-        print("🪝  Baue Environment und Hooks neu auf (uv sync)...")
+        # 7. Rebuild environment & hooks
+        print("🪝  Rebuilding environment and hooks (uv sync)...")
         _run_cmd([uv_path, "sync", "--frozen"], cwd=project_root)
         _run_cmd([uv_path, "run", "pre-commit", "install"], cwd=project_root)
 
-        # Finaler Cleanup
+        # Final cleanup
         if backup_dir.exists():
             shutil.rmtree(backup_dir)
 
-        print("\n✨ Fertig! Starte deine neue Shell mit: source .venv/bin/activate")
+        print("\n✨ Done! Start your new shell with: source .venv/bin/activate")
 
     except (subprocess.CalledProcessError, Exception) as e:
-        print(f"\n💥 FEHLER: {e}")
+        print(f"\n💥 ERROR: {e}")
         _rollback(steps, git_dir, backup_dir)
         sys.exit(1)
 
 
 def _rollback(steps: list[str], git_dir: Path, backup_dir: Path) -> None:
     """Reverts Git changes to restore the original state."""
-    print("🔄 Starte Rollback...")
+    print("🔄 Starting rollback...")
     if "git_inited" in steps and git_dir.exists():
         shutil.rmtree(git_dir, ignore_errors=True)
 
     if "git_backup" in steps and backup_dir.exists():
         backup_dir.rename(git_dir)
-        print("✅ Ursprünglicher .git-Ordner wurde wiederhergestellt.")
-    print("\n❌ Initialisierung fehlgeschlagen. Ursprungszustand wiederhergestellt.")
+        print("✅ Original .git folder has been restored.")
+    print("\n❌ Initialization failed. Original state restored.")
 
 
 if __name__ == "__main__":
