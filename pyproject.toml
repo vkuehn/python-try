@@ -18,6 +18,8 @@ dependencies = [
     "mkdocs-autorefs>=1.4.3",
     "tox-uv>=1.29.0",
     "pylint>=4.0.2",
+    "spyder>=6.1.2",
+    "setuptools>=82.0.0",
 ]
 
 [project.urls]

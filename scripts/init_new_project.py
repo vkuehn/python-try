@@ -10,7 +10,7 @@ import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
-# --- Custom Exceptions (Fixes TRY003) ---
+from check_git_config import check_git_config
 
 
 class ProjectInitError(Exception):
@@ -63,9 +63,6 @@ def _resolve_executable(name: str) -> Path:
     if not resolved:
         raise DependencyNotFoundError(name)
     return Path(resolved).absolute()
-
-
-# --- Main Logic Class (Fixes C901) ---
 
 
 @dataclass
@@ -266,13 +263,6 @@ class ProjectInitializer:
 
 def main() -> None:
     """Entry point."""
-    # Local import to avoid global scope pollution if module used elsewhere
-    try:
-        from check_git_config import check_git_config
-    except ImportError:
-        print("❌ 'check_git_config.py' module not found.")
-        sys.exit(1)
-
     print("🔍 Checking Git configuration...")
     git_config = check_git_config()
 
