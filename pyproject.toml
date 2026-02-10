@@ -18,6 +18,7 @@ dependencies = [
     "mkdocs-autorefs>=1.4.3",
     "tox-uv>=1.29.0",
     "pylint>=4.0.2",
+    "toml>=0.10.2",
 ]
 
 [project.urls]
@@ -62,7 +63,6 @@ lint.select = [
     "D",    # pydocstyle
 ]
 lint.ignore = [
-    "E501",  # LineTooLong
     "E731",  # DoNotAssignLambda
 ]
 
