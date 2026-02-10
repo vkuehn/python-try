@@ -2,19 +2,84 @@
 
 import contextlib
 import importlib.util
+import logging
 import shutil
 import stat
 import subprocess
 import sys
-import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import tomlkit
 from check_git_config import check_git_config
+
+# Setup logging in your initializer or main():
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
 
 
 class ProjectInitError(Exception):
     """Base exception for project initialization errors."""
+
+
+@dataclass
+class ProjectConfig:
+    """Configuration for pyproject.toml updates."""
+
+    name: str
+    authors: list[dict[str, str]]
+    version: str
+    description: str
+    documentation_url: str = ""
+    repository_url: str = ""
+
+
+def backup_pyproject_toml(file_path: Path) -> None:
+    """Create a backup of the pyproject.toml file.
+
+    Parameters
+    ----------
+    file_path : str
+        Path to the pyproject.toml file to backup.
+    """
+    backup_path = Path(str(file_path) + ".backup")
+    with open(file_path) as original_file, open(backup_path, "w") as backup_file:
+        backup_file.write(original_file.read())
+    print(f"Backup created at {backup_path}")
+
+
+def update_pyproject_toml(config: ProjectConfig) -> None:
+    """Update authors, version, and description in pyproject.toml.
+
+    Parameters
+    ----------
+    config : ProjectConfig
+        Configuration object containing all project metadata.
+    """
+    # Load the existing pyproject.toml file
+    with open(config.file_path) as file:
+        pyproject_data = tomlkit.load(file)
+
+    # Update the project owner, version, and description
+
+    authors_array = tomlkit.array()
+    for author in config.authors:
+        inline_table = tomlkit.inline_table()
+        inline_table.update(author)
+        authors_array.append(inline_table)
+
+    pyproject_data["project"]["name"] = config.name
+    pyproject_data["project"]["authors"] = authors_array
+    pyproject_data["project"]["version"] = config.version
+    pyproject_data["project"]["description"] = config.description
+
+    # Update project CONFIG
+    pyproject_data["project"]["urls"]["Documentation"] = config.documentation_url
+    pyproject_data["project"]["urls"]["Repository"] = config.repository_url
+
+    # Write the updated data back to the pyproject.toml file
+    with open(config.file_path, "w") as file:
+        tomlkit.dump(pyproject_data, file)
 
 
 class DependencyNotFoundError(ProjectInitError):
@@ -69,8 +134,6 @@ def _resolve_executable(name: str) -> Path:
 class ProjectInitializer:
     """Handles the initialization of a new project from the template."""
 
-    author: str
-    email: str
     project_root: Path = field(default_factory=lambda: Path(__file__).parent.resolve())
     git_path: Path = field(init=False)
     uv_path: Path = field(init=False)
@@ -100,8 +163,8 @@ class ProjectInitializer:
     def check_dependencies(self) -> None:
         """Verify all required tools and libraries are present."""
         # 1. Check Python libs
-        if not importlib.util.find_spec("tomli_w") or not importlib.util.find_spec("tomllib"):
-            msg = "Run 'pip install tomli-w' (requires Python 3.11+ for tomllib)."
+        if not importlib.util.find_spec("tomlkit") or not importlib.util.find_spec("tomlkit"):
+            msg = "Run 'uv sync --frozen' to install required Python libraries."
             raise DependencyNotFoundError("tomli_w/tomllib", msg)
 
         # 2. Check System tools
@@ -111,16 +174,6 @@ class ProjectInitializer:
         if not self.pyproject_file.exists():
             msg = f"pyproject.toml not found at {self.pyproject_file}"
             raise FileOperationError(msg)
-
-    def get_user_input(self) -> tuple[str, str]:
-        """Gather project details from user."""
-        name = input("🔗 New project name (Enter): ").strip()
-        if len(name) < 3:
-            msg = f"Name '{name}' is too short (min 3 chars)."
-            raise InputValidationError(msg)
-
-        remote = input("🔗 New remote URL (Enter to skip): ").strip()
-        return name, remote
 
     def backup_git_history(self) -> None:
         """Move existing .git folder to backup location."""
@@ -138,40 +191,26 @@ class ProjectInitializer:
             msg = f"Failed to backup .git: {e}"
             raise FileOperationError(msg) from e
 
-    def update_pyproject(self, new_name: str, remote_url: str) -> None:
-        """Modify pyproject.toml with new metadata."""
-        print("📝 Updating pyproject.toml...")
-        # Create backup
-        shutil.copy(self.pyproject_file, self.pyproject_backup)
-        self._steps_taken.append("pyproject_mod")
+    def _exit_on_error(self, error: Exception, exit_code: int = 1) -> None:
+        """Log error, rollback, and exit cleanly."""
+        logger.error(f"ERROR: {error}")
+        self.rollback()
+        sys.exit(exit_code)
 
-        with self.pyproject_file.open("rb") as f:
-            config = tomllib.load(f)
+    def _get_user_input(self, user_email: str, user_name: str) -> tuple[str, str, str]:
+        name = input("🔗 New project name (Enter): ").strip()
+        author = input(f"🔗 Author name [{user_name}]: ").strip() or user_name
+        email = input(f"🔗 Author email [{user_email}]: ").strip() or user_email
 
-        # Modify structure
-        project = config.get("project", {})
-        project["name"] = new_name
-        project["authors"] = [{"name": self.author, "email": self.email}]
+        # Validate inputs
+        if not name or not isinstance(name, str):
+            self._exit_on_error(InputValidationError("Project Name"), exit_code=130)
+        if not author or not isinstance(author, str):
+            self._exit_on_error(InputValidationError("Author name"), exit_code=130)
+        if not email or not isinstance(email, str):
+            self._exit_on_error(InputValidationError("Author email"), exit_code=130)
 
-        if "urls" not in project:
-            project["urls"] = {}
-
-        if remote_url:
-            project["urls"]["Repository"] = remote_url
-
-        # Save
-        config["project"] = project
-        lines = []
-        for section, content in config.items():
-            if isinstance(content, dict):
-                lines.append(f"[{section}]")
-                for key, value in content.items():
-                    if isinstance(value, (list, dict)):
-                        lines.append(f"{key} = {value!r}")
-                    else:
-                        lines.append(f'{key} = "{value}"')
-                lines.append("")
-        self.pyproject_file.write_text("\n".join(lines))
+        return author, email, name
 
     def reinitialize_git(self, remote_url: str, new_name: str) -> None:
         """Initialize fresh git repo and commit."""
@@ -237,32 +276,41 @@ class ProjectInitializer:
         self.check_dependencies()
 
         try:
-            new_name, remote_url = self.get_user_input()
+            author, email, name = self._get_user_input(user_email, user_name)
 
-            print(f"🚀 Initializing project as '{new_name}'")
-            print("⚠️  WARNING: This will delete Git history and .venv!")
+            config = ProjectConfig(
+                name=name,
+                authors=[{"name": author, "email": email}],
+                version="0.0.1",
+                description="A sample Python project using Poetry.",
+                documentation_url="https://github.io/test/docs",
+                repository_url="https://github.com/test/repo",
+            )
+
+            logger.info(f"🚀 Initializing project as '{name}'")
+            logger.warning("⚠️  This will delete Git history and .venv!")
             if input("Continue? (y/n): ").lower() != "y":
-                print("Aborted.")
+                logger.info("Aborted.")
                 return
 
             self.backup_git_history()
-            self.update_pyproject(new_name, remote_url)
-            self.reinitialize_git(remote_url, new_name)
+            update_pyproject_toml(config)
+            self.reinitialize_git(config.repository_url, config.name)
             self.install_environment()
             self.cleanup_success()
 
         except (subprocess.CalledProcessError, ProjectInitError, OSError) as e:
             print(f"\n💥 ERROR: {e}")
             self.rollback()
-            sys.exit(1)
+            self._exit_on_error(ProjectInitError("User interrupted"), exit_code=130)
         except KeyboardInterrupt:
-            print("\n🛑 Interrupted by user.")
-            self.rollback()
-            sys.exit(1)
+            logger.info("🛑 Interrupted by user.")
+            self._exit_on_error(KeyboardInterrupt("User interrupted"), exit_code=130)
 
 
-def main() -> None:
+if __name__ == "__main__":
     """Entry point."""
+    # Ask User for new ProjectConfig details
     print("🔍 Checking Git configuration...")
     git_config = check_git_config()
 
@@ -273,11 +321,7 @@ def main() -> None:
     user_name = git_config.get("username", "Unknown")
     user_email = git_config.get("email", "unknown@example.com")
 
-    print("✅ Git configuration looks good.")
+    print("✅ Git configuration looks good.Continue with project initialization.")
 
-    initializer = ProjectInitializer(author=user_name, email=user_email)
+    initializer = ProjectInitializer()
     initializer.execute()
-
-
-if __name__ == "__main__":
-    main()
