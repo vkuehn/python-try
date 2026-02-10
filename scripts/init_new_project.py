@@ -1,10 +1,12 @@
 """Initialize a new project from this template with rollback safety."""
 
+import contextlib
 import importlib.util
 import shutil
 import stat
 import subprocess
 import sys
+import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -19,6 +21,7 @@ class DependencyNotFoundError(ProjectInitError):
     """Raised when a required external tool or library is missing."""
 
     def __init__(self, name: str, instructions: str = "") -> None:
+        """Initialize with the missing dependency name and optional instructions."""
         msg = f"Required dependency not found: {name}. {instructions}"
         super().__init__(msg)
 
@@ -32,22 +35,26 @@ class FileOperationError(ProjectInitError):
 
 
 # --- Helper Functions ---
-
-
-def _remove_readonly(func: callable, path: str, _) -> None:  # type: ignore
-    """Error handler for shutil.rmtree to remove read-only files (Windows fix)."""
-    try:
-        os_chmod = importlib.import_module("os").chmod
-        os_chmod(path, stat.S_IWRITE)
-        func(path)
-    except ImportError, OSError:
-        pass
-
-
-def _safe_rmtree(path: Path) -> None:
+def _delete_path(path: Path) -> None:
     """Robustly remove a directory tree."""
-    if path.exists():
-        shutil.rmtree(path, onerror=_remove_readonly)
+    if not path.exists():
+        return
+
+    if path.is_file():
+        path.unlink()
+        return
+
+    for item in path.rglob("*"):
+        try:
+            if item.is_file():
+                item.chmod(stat.S_IWRITE)
+                item.unlink()
+            elif item.is_dir() and not any(item.iterdir()):
+                item.rmdir()
+        except OSError:
+            pass
+    with contextlib.suppress(OSError):
+        path.rmdir()
 
 
 def _resolve_executable(name: str) -> Path:
@@ -75,18 +82,22 @@ class ProjectInitializer:
 
     @property
     def git_dir(self) -> Path:
+        """Git directory path."""
         return self.project_root / ".git"
 
     @property
     def backup_dir(self) -> Path:
+        """Git backup directory path."""
         return self.project_root / ".git_backup"
 
     @property
     def pyproject_file(self) -> Path:
+        """Pyproject.toml file path."""
         return self.project_root / "pyproject.toml"
 
     @property
     def pyproject_backup(self) -> Path:
+        """Pyproject.toml backup file path."""
         return self.project_root / "pyproject.toml.bak"
 
     def check_dependencies(self) -> None:
@@ -121,7 +132,7 @@ class ProjectInitializer:
 
         print("📦 Backing up .git...")
         if self.backup_dir.exists():
-            _safe_rmtree(self.backup_dir)
+            _delete_path(self.backup_dir)
 
         try:
             self.git_dir.rename(self.backup_dir)
@@ -132,10 +143,6 @@ class ProjectInitializer:
 
     def update_pyproject(self, new_name: str, remote_url: str) -> None:
         """Modify pyproject.toml with new metadata."""
-        import tomllib  # type: ignore
-
-        import tomli_w  # type: ignore
-
         print("📝 Updating pyproject.toml...")
         # Create backup
         shutil.copy(self.pyproject_file, self.pyproject_backup)
@@ -156,8 +163,18 @@ class ProjectInitializer:
             project["urls"]["Repository"] = remote_url
 
         # Save
-        with self.pyproject_file.open("wb") as f:
-            tomli_w.dump(config, f)
+        config["project"] = project
+        lines = []
+        for section, content in config.items():
+            if isinstance(content, dict):
+                lines.append(f"[{section}]")
+                for key, value in content.items():
+                    if isinstance(value, (list, dict)):
+                        lines.append(f"{key} = {value!r}")
+                    else:
+                        lines.append(f'{key} = "{value}"')
+                lines.append("")
+        self.pyproject_file.write_text("\n".join(lines))
 
     def reinitialize_git(self, remote_url: str, new_name: str) -> None:
         """Initialize fresh git repo and commit."""
@@ -166,7 +183,7 @@ class ProjectInitializer:
         # Clean old venv if exists
         venv_dir = self.project_root / ".venv"
         if venv_dir.exists():
-            _safe_rmtree(venv_dir)
+            _delete_path(venv_dir)
 
         # Init
         self._run([str(self.git_path), "init", "-b", "main"])
@@ -188,7 +205,7 @@ class ProjectInitializer:
     def cleanup_success(self) -> None:
         """Remove backups after successful run."""
         if self.backup_dir.exists():
-            _safe_rmtree(self.backup_dir)
+            _delete_path(self.backup_dir)
         if self.pyproject_backup.exists():
             self.pyproject_backup.unlink()
         print("\n✨ Done! Start your shell with: source .venv/bin/activate")
@@ -199,11 +216,11 @@ class ProjectInitializer:
 
         # 1. Restore Git
         if "git_inited" in self._steps_taken and self.git_dir.exists():
-            _safe_rmtree(self.git_dir)
+            _delete_path(self.git_dir)
 
         if "git_backup" in self._steps_taken and self.backup_dir.exists():
             if self.git_dir.exists():
-                _safe_rmtree(self.git_dir)
+                _delete_path(self.git_dir)
             self.backup_dir.rename(self.git_dir)
             print("✅ Restored original .git directory.")
 
