@@ -1,169 +1,276 @@
-"""Initialize a new project from this with rollback safety."""
+"""Initialize a new project from this template with rollback safety."""
 
+import importlib.util
 import shutil
+import stat
 import subprocess
 import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 
-from check_git_config import check_git_config
+# --- Custom Exceptions (Fixes TRY003) ---
 
 
-def _resolve_executable(name: str) -> str:
-    """Resolve an executable path and verify it exists (Bandit S607 fix)."""
+class ProjectInitError(Exception):
+    """Base exception for project initialization errors."""
+
+
+class DependencyNotFoundError(ProjectInitError):
+    """Raised when a required external tool or library is missing."""
+
+    def __init__(self, name: str, instructions: str = "") -> None:
+        msg = f"Required dependency not found: {name}. {instructions}"
+        super().__init__(msg)
+
+
+class InputValidationError(ProjectInitError):
+    """Raised when user input fails validation."""
+
+
+class FileOperationError(ProjectInitError):
+    """Raised when file system operations fail."""
+
+
+# --- Helper Functions ---
+
+
+def _remove_readonly(func: callable, path: str, _) -> None:  # type: ignore
+    """Error handler for shutil.rmtree to remove read-only files (Windows fix)."""
+    try:
+        os_chmod = importlib.import_module("os").chmod
+        os_chmod(path, stat.S_IWRITE)
+        func(path)
+    except ImportError, OSError:
+        pass
+
+
+def _safe_rmtree(path: Path) -> None:
+    """Robustly remove a directory tree."""
+    if path.exists():
+        shutil.rmtree(path, onerror=_remove_readonly)
+
+
+def _resolve_executable(name: str) -> Path:
+    """Resolve an executable path."""
     resolved = shutil.which(name)
     if not resolved:
-        msg = f"Required executable not found on PATH: {name}"
-        raise FileNotFoundError(msg)
-    return str(Path(resolved).absolute())
+        raise DependencyNotFoundError(name)
+    return Path(resolved).absolute()
 
 
-def _run_cmd(cmd: list[str], cwd: Path) -> None:
-    """Run a subprocess command with security bypass for known tools."""
-    subprocess.run(cmd, cwd=cwd, check=True, shell=False)  # noqa: S603
+# --- Main Logic Class (Fixes C901) ---
 
 
-def migrate_pyproject(pyproject_path: Path, new_name: str, new_author: str, new_email: str):
-    """Update pyproject.toml with new project name and author info."""
-    if not pyproject_path.exists():
-        return print("❌ pyproject.toml not found.")
+@dataclass
+class ProjectInitializer:
+    """Handles the initialization of a new project from the template."""
 
-    # 1. Read and Identify Old Name
-    lines = pyproject_path.read_text().splitlines()
-    old_name = None
-    for line in lines:
-        if line.startswith('name = "'):
-            old_name = line.split('"')[1]
-            break
+    author: str
+    email: str
+    project_root: Path = field(default_factory=lambda: Path(__file__).parent.resolve())
+    git_path: Path = field(init=False)
+    uv_path: Path = field(init=False)
+    # Rollback state
+    _steps_taken: list[str] = field(default_factory=list)
 
-    if not old_name:
-        return print("❌ Could not determine old project name.")
+    @property
+    def git_dir(self) -> Path:
+        return self.project_root / ".git"
 
-    # 2. Reconstruct pyproject.toml line-by-line
-    new_lines = []
-    for line in lines:
-        if line.strip().startswith('name = "'):
-            new_lines.append(f'name = "{new_name}"')
-        elif line.strip().startswith('name = "') and "authors" in "".join(new_lines[-5:]):
-            # This handles the name inside the authors block specifically
-            new_lines.append(f'    {{ name = "{new_author}", email = "{new_email}" }},')
-        elif "email =" in line and "name =" in line and "[" in "".join(new_lines[-2:]):
-            # Simplified author replacement for standard uv init layout
-            new_lines.append(f'authors = [{{ name = "{new_author}", email = "{new_email}" }}]')
-        else:
-            new_lines.append(line)
+    @property
+    def backup_dir(self) -> Path:
+        return self.project_root / ".git_backup"
 
-    pyproject_path.write_text("\n".join(new_lines) + "\n")
-    print("✅ Metadata updated in pyproject.toml")
+    @property
+    def pyproject_file(self) -> Path:
+        return self.project_root / "pyproject.toml"
 
-    # 5. Refresh uv state
-    lock_file = pyproject_path / "uv.lock"
-    if lock_file.exists():
-        lock_file.unlink()
-        print("🗑️  Old lockfile removed. Run 'uv sync' to regenerate.")
+    @property
+    def pyproject_backup(self) -> Path:
+        return self.project_root / "pyproject.toml.bak"
 
+    def check_dependencies(self) -> None:
+        """Verify all required tools and libraries are present."""
+        # 1. Check Python libs
+        if not importlib.util.find_spec("tomli_w") or not importlib.util.find_spec("tomllib"):
+            msg = "Run 'pip install tomli-w' (requires Python 3.11+ for tomllib)."
+            raise DependencyNotFoundError("tomli_w/tomllib", msg)
 
-def init_new_project(new_author: str, new_email: str) -> None:
-    """Main entry point for project initialization."""
-    project_root: Path = Path(__file__).parent.parent
-    git_dir: Path = project_root / ".git"
-    backup_dir: Path = project_root / ".git_backup"
-    venv_dir: Path = project_root / ".venv"
-    new_project_name: str = project_root.name
-    pyproject_backup_path = project_root / "pyproject.toml.bak"
+        # 2. Check System tools
+        self.git_path = _resolve_executable("git")
+        self.uv_path = _resolve_executable("uv")
 
-    try:
-        git_path: str = _resolve_executable("git")
-        uv_path: str = _resolve_executable("uv")
-    except FileNotFoundError as e:
-        print(f"❌ Error: {e}")
-        sys.exit(1)
+        if not self.pyproject_file.exists():
+            msg = f"pyproject.toml not found at {self.pyproject_file}"
+            raise FileOperationError(msg)
 
-    print(f"🚀 Initializing project from '{new_project_name}' template")
-    print("⚠️  WARNING: This will delete the Git history and .venv!")
-    if input("Continue? (y/n): ").lower() != "y":
-        print("Aborted.")
-        sys.exit(0)
+    def get_user_input(self) -> tuple[str, str]:
+        """Gather project details from user."""
+        name = input("🔗 New project name (Enter): ").strip()
+        if len(name) < 3:
+            msg = f"Name '{name}' is too short (min 3 chars)."
+            raise InputValidationError(msg)
 
-    steps: list[str] = []
+        remote = input("🔗 New remote URL (Enter to skip): ").strip()
+        return name, remote
 
-    try:
-        # 1. Backup Git
-        if git_dir.exists():
-            print(f"📦 Backing up .git -> {backup_dir.name}...")
-            if backup_dir.exists():
-                shutil.rmtree(backup_dir)
-            git_dir.rename(backup_dir)
-            steps.append("git_backup")
+    def backup_git_history(self) -> None:
+        """Move existing .git folder to backup location."""
+        if not self.git_dir.exists():
+            return
 
-        # 2. Update metadata (pyproject.toml)
-        pyproject_path = project_root / "pyproject.toml"
-        if not pyproject_path.exists():
-            print("❌ pyproject.toml not found. Cannot update project metadata.")
-            sys.exit(1)
-        else:
-            print("Backing up and updating pyproject.toml metadata...")
-            # copy pyproject.toml to backup before modifying
-            shutil.copy(pyproject_path, pyproject_backup_path)
-        migrate_pyproject(pyproject_path, new_project_name, new_author, new_email)
+        print("📦 Backing up .git...")
+        if self.backup_dir.exists():
+            _safe_rmtree(self.backup_dir)
 
-        # 3. Remove old .venv (because of old name in prompt)
-        if venv_dir.exists():
-            print("🧹 Removing old virtual environment...")
-            shutil.rmtree(venv_dir)
+        try:
+            self.git_dir.rename(self.backup_dir)
+            self._steps_taken.append("git_backup")
+        except OSError as e:
+            msg = f"Failed to backup .git: {e}"
+            raise FileOperationError(msg) from e
 
-        # 4. Re-initialize Git
-        print("🌱 Initializing new Git repository...")
-        _run_cmd([git_path, "init", "-b", "main"], cwd=project_root)
-        steps.append("git_inited")
+    def update_pyproject(self, new_name: str, remote_url: str) -> None:
+        """Modify pyproject.toml with new metadata."""
+        import tomllib  # type: ignore
 
-        # 5. Set remote
-        remote_url = input("🔗 New remote URL (Enter to skip): ").strip()
+        import tomli_w  # type: ignore
+
+        print("📝 Updating pyproject.toml...")
+        # Create backup
+        shutil.copy(self.pyproject_file, self.pyproject_backup)
+        self._steps_taken.append("pyproject_mod")
+
+        with self.pyproject_file.open("rb") as f:
+            config = tomllib.load(f)
+
+        # Modify structure
+        project = config.get("project", {})
+        project["name"] = new_name
+        project["authors"] = [{"name": self.author, "email": self.email}]
+
+        if "urls" not in project:
+            project["urls"] = {}
+
         if remote_url:
-            _run_cmd([git_path, "remote", "add", "origin", remote_url], cwd=project_root)
+            project["urls"]["Repository"] = remote_url
 
-        # 6. Initial commit
+        # Save
+        with self.pyproject_file.open("wb") as f:
+            tomli_w.dump(config, f)
+
+    def reinitialize_git(self, remote_url: str, new_name: str) -> None:
+        """Initialize fresh git repo and commit."""
+        print("🌱 Initializing Git repository...")
+
+        # Clean old venv if exists
+        venv_dir = self.project_root / ".venv"
+        if venv_dir.exists():
+            _safe_rmtree(venv_dir)
+
+        # Init
+        self._run([str(self.git_path), "init", "-b", "main"])
+        self._steps_taken.append("git_inited")
+
+        if remote_url:
+            self._run([str(self.git_path), "remote", "add", "origin", remote_url])
+
         print("💾 Creating initial commit...")
-        _run_cmd([git_path, "add", "."], cwd=project_root)
-        _run_cmd([git_path, "commit", "-m", f"Initial commit for {new_project_name}"], cwd=project_root)
+        self._run([str(self.git_path), "add", "."])
+        self._run([str(self.git_path), "commit", "-m", f"Initial commit for {new_name}"])
 
-        # 7. Rebuild environment & hooks
-        print("🪝  Rebuilding environment and hooks (uv sync)...")
-        _run_cmd([uv_path, "sync", "--frozen"], cwd=project_root)
-        _run_cmd([uv_path, "run", "pre-commit", "install"], cwd=project_root)
+    def install_environment(self) -> None:
+        """Sync uv environment and install hooks."""
+        print("🪝  Rebuilding environment and hooks...")
+        self._run([str(self.uv_path), "sync", "--frozen"])
+        self._run([str(self.uv_path), "run", "pre-commit", "install"])
 
-        # Final cleanup
-        if backup_dir.exists():
-            shutil.rmtree(backup_dir)
+    def cleanup_success(self) -> None:
+        """Remove backups after successful run."""
+        if self.backup_dir.exists():
+            _safe_rmtree(self.backup_dir)
+        if self.pyproject_backup.exists():
+            self.pyproject_backup.unlink()
+        print("\n✨ Done! Start your shell with: source .venv/bin/activate")
 
-        print("\n✨ Done! Start your new shell with: source .venv/bin/activate")
+    def rollback(self) -> None:
+        """Restore state based on steps taken."""
+        print("\n🔄 Starting rollback due to failure...")
 
-    except (subprocess.CalledProcessError, Exception) as e:
-        print(f"\n💥 ERROR: {e}")
-        _rollback(steps, git_dir, backup_dir)
+        # 1. Restore Git
+        if "git_inited" in self._steps_taken and self.git_dir.exists():
+            _safe_rmtree(self.git_dir)
+
+        if "git_backup" in self._steps_taken and self.backup_dir.exists():
+            if self.git_dir.exists():
+                _safe_rmtree(self.git_dir)
+            self.backup_dir.rename(self.git_dir)
+            print("✅ Restored original .git directory.")
+
+        # 2. Restore pyproject.toml
+        if "pyproject_mod" in self._steps_taken and self.pyproject_backup.exists():
+            if self.pyproject_file.exists():
+                self.pyproject_file.unlink()
+            self.pyproject_backup.rename(self.pyproject_file)
+            print("✅ Restored original pyproject.toml.")
+
+    def _run(self, cmd: list[str]) -> None:
+        """Execute subprocess command securely."""
+        subprocess.run(cmd, cwd=self.project_root, check=True, shell=False)  # noqa: S603
+
+    def execute(self) -> None:
+        """Orchestrate the initialization process."""
+        self.check_dependencies()
+
+        try:
+            new_name, remote_url = self.get_user_input()
+
+            print(f"🚀 Initializing project as '{new_name}'")
+            print("⚠️  WARNING: This will delete Git history and .venv!")
+            if input("Continue? (y/n): ").lower() != "y":
+                print("Aborted.")
+                return
+
+            self.backup_git_history()
+            self.update_pyproject(new_name, remote_url)
+            self.reinitialize_git(remote_url, new_name)
+            self.install_environment()
+            self.cleanup_success()
+
+        except (subprocess.CalledProcessError, ProjectInitError, OSError) as e:
+            print(f"\n💥 ERROR: {e}")
+            self.rollback()
+            sys.exit(1)
+        except KeyboardInterrupt:
+            print("\n🛑 Interrupted by user.")
+            self.rollback()
+            sys.exit(1)
+
+
+def main() -> None:
+    """Entry point."""
+    # Local import to avoid global scope pollution if module used elsewhere
+    try:
+        from check_git_config import check_git_config
+    except ImportError:
+        print("❌ 'check_git_config.py' module not found.")
         sys.exit(1)
 
+    print("🔍 Checking Git configuration...")
+    git_config = check_git_config()
 
-def _rollback(steps: list[str], git_dir: Path, backup_dir: Path) -> None:
-    """Reverts Git changes to restore the original state."""
-    print("🔄 Starting rollback...")
-    if "git_inited" in steps and git_dir.exists():
-        shutil.rmtree(git_dir, ignore_errors=True)
+    if not git_config:
+        print("❌ Git configuration check failed.")
+        sys.exit(1)
 
-    if "git_backup" in steps and backup_dir.exists():
-        backup_dir.rename(git_dir)
-        print("✅ Original .git folder has been restored.")
-    print("\n❌ Initialization failed. Original state restored.")
+    user_name = git_config.get("username", "Unknown")
+    user_email = git_config.get("email", "unknown@example.com")
+
+    print("✅ Git configuration looks good.")
+
+    initializer = ProjectInitializer(author=user_name, email=user_email)
+    initializer.execute()
 
 
 if __name__ == "__main__":
-    print("🔍 Checking Git configuration...")
-    git_config = check_git_config()
-    if not git_config:
-        print("❌ Git configuration check failed. Please fix the issues and try again.")
-        sys.exit(1)
-    user_name = git_config.get("username")
-    user_email = git_config.get("email")
-    print("✅ Git configuration looks good. using the following:")
-    print(f"👤 Git user.name: {user_name}")
-    print(f"📧 Git user.email: {user_email}")
-    init_new_project(new_author=user_name, new_email=user_email)
+    main()

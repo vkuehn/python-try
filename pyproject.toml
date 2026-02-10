@@ -18,6 +18,7 @@ dependencies = [
     "mkdocs-autorefs>=1.4.3",
     "tox-uv>=1.29.0",
     "pylint>=4.0.2",
+    "tomli_w>=1.0.0,<2.0.0",
 ]
 
 [project.urls]
