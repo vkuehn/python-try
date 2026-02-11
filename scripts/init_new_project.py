@@ -13,13 +13,8 @@ from pathlib import Path
 import tomlkit
 from check_git_config import check_git_config
 
-# Setup logging in your initializer or main():
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
-
-
-class ProjectInitError(Exception):
-    """Base exception for project initialization errors."""
 
 
 @dataclass
@@ -32,6 +27,10 @@ class ProjectConfig:
     description: str
     documentation_url: str = ""
     repository_url: str = ""
+
+
+class ProjectInitError(Exception):
+    """Base exception for project initialization errors."""
 
 
 class DependencyNotFoundError(ProjectInitError):
@@ -49,29 +48,6 @@ class InputValidationError(ProjectInitError):
 
 class FileOperationError(ProjectInitError):
     """Raised when file system operations fail."""
-
-
-# --- Helper Functions ---
-def _delete_path(path: Path) -> None:
-    """Robustly remove a directory tree."""
-    if not path.exists():
-        return
-
-    if path.is_file():
-        path.unlink()
-        return
-
-    for item in path.rglob("*"):
-        try:
-            if item.is_file():
-                item.chmod(stat.S_IWRITE)
-                item.unlink()
-            elif item.is_dir() and not any(item.iterdir()):
-                item.rmdir()
-        except OSError:
-            pass
-    with contextlib.suppress(OSError):
-        path.rmdir()
 
 
 class ProjectInitializer:
@@ -130,9 +106,9 @@ class ProjectInitializer:
             logger.info("Aborted.")
             self._exit_on_error(InputValidationError("User decided to stop at git history deletion"), exit_code=130)
 
-        print("📦 Backing up .git...")
+        logger.info("📦 Backing up .git...")
         if self.git_backup_dir.exists():
-            _delete_path(self.git_backup_dir)
+            self._delete_path(self.git_backup_dir)
 
         try:
             self.git_dir.rename(self.git_backup_dir)
@@ -152,7 +128,28 @@ class ProjectInitializer:
         with open(file_path) as original_file, open(self.pyproject_file_backup, "w") as backup_file:
             backup_file.write(original_file.read())
         self._steps_taken.append("pyproject_mod")
-        print(f"Backup created at {self.pyproject_file_backup}")
+        logger.info(f"Backup created at {self.pyproject_file_backup}")
+
+    def _delete_path(self, path: Path) -> None:
+        """Robustly remove a directory tree."""
+        if not path.exists():
+            return
+
+        if path.is_file():
+            path.unlink()
+            return
+
+        for item in path.rglob("*"):
+            try:
+                if item.is_file():
+                    item.chmod(stat.S_IWRITE)
+                    item.unlink()
+                elif item.is_dir() and not any(item.iterdir()):
+                    item.rmdir()
+            except OSError:
+                pass
+        with contextlib.suppress(OSError):
+            path.rmdir()
 
     def _exit_on_error(self, error: Exception, exit_code: int = 1) -> None:
         """Log error, rollback, and exit cleanly."""
@@ -195,12 +192,12 @@ class ProjectInitializer:
 
     def reinitialize_git(self, remote_url: str, new_name: str) -> None:
         """Initialize fresh git repo and commit."""
-        print("🌱 Initializing Git repository...")
+        logger.info("🌱 Initializing Git repository...")
 
         # Clean old venv if exists
         venv_dir = self.project_root / ".venv"
         if venv_dir.exists():
-            _delete_path(venv_dir)
+            self._delete_path(venv_dir)
 
         # Init
         self._run([str(self.git_path), "init", "-b", "main"])
@@ -209,44 +206,44 @@ class ProjectInitializer:
         if remote_url:
             self._run([str(self.git_path), "remote", "add", "origin", remote_url])
 
-        print("💾 Creating initial commit...")
+        logger.info("💾 Creating initial commit...")
         self._run([str(self.git_path), "add", "."])
         self._run([str(self.git_path), "commit", "-m", f"Initial commit for {new_name}"])
 
     def install_environment(self) -> None:
         """Sync uv environment and install hooks."""
-        print("🪝  Rebuilding environment and hooks...")
+        logger.info("🪝  Rebuilding environment and hooks...")
         self._run([str(self.uv_path), "sync", "--frozen"])
         self._run([str(self.uv_path), "run", "pre-commit", "install"])
 
     def cleanup_success(self) -> None:
         """Remove backups after successful run."""
         if self.git_backup_dir.exists():
-            _delete_path(self.git_backup_dir)
+            self._delete_path(self.git_backup_dir)
         if self.pyproject_file_backup.exists():
             self.pyproject_file_backup.unlink()
-        print("\n✨ Done! Start your shell with: source .venv/bin/activate")
+        logger.info("\n✨ Done! Start your shell with: source .venv/bin/activate")
 
     def rollback(self) -> None:
         """Restore state based on steps taken."""
-        print("\n🔄 Starting rollback due to failure...")
+        logger.info("\n🔄 Starting rollback due to failure...")
 
         # 1. Restore Git
         if "git_inited" in self._steps_taken and self.git_dir.exists():
-            _delete_path(self.git_dir)
+            self._delete_path(self.git_dir)
 
         if "git_backup" in self._steps_taken and self.git_backup_dir.exists():
             if self.git_dir.exists():
-                _delete_path(self.git_dir)
+                self._delete_path(self.git_dir)
             self.git_backup_dir.rename(self.git_dir)
-            print("✅ Restored original .git directory.")
+            logger.info("✅ Restored original .git directory.")
 
         # 2. Restore pyproject.toml
         if "pyproject_mod" in self._steps_taken and self.pyproject_file_backup.exists():
             if self.pyproject_file.exists():
                 self.pyproject_file.unlink()
             self.pyproject_file_backup.rename(self.pyproject_file)
-            print("✅ Restored original pyproject.toml.")
+            logger.info("✅ Restored original pyproject.toml.")
 
     def _run(self, cmd: list[str]) -> None:
         """Execute subprocess command securely."""
@@ -289,17 +286,17 @@ class ProjectInitializer:
         self.check_dependencies()
 
         # Ask User for new ProjectConfig details
-        print("🔍 Checking Git global configuration...")
+        logger.info("🔍 Checking Git global configuration...")
         git_config = check_git_config()
 
         if not git_config:
-            print("❌ Git global configuration check failed.")
+            logger.info("❌ Git global configuration check failed.")
             sys.exit(1)
 
         user_name = git_config.get("username")
         user_email = git_config.get("email")
 
-        print("✅ Git configuration looks good.Continue with project initialization.")
+        logger.info("✅ Git configuration looks good.Continue with project initialization.")
 
         try:
             config = self._get_user_input(user_email, user_name)
@@ -314,7 +311,7 @@ class ProjectInitializer:
             self.cleanup_success()
 
         except (subprocess.CalledProcessError, ProjectInitError, OSError) as e:
-            print(f"\n💥 ERROR: {e}")
+            logger.info(f"\n💥 ERROR: {e}")
             self.rollback()
             self._exit_on_error(ProjectInitError("User interrupted"), exit_code=130)
         except KeyboardInterrupt:
