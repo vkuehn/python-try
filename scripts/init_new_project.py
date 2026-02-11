@@ -116,6 +116,7 @@ def init_new_project() -> None:
     except subprocess.CalledProcessError:
         user_name = "none"
         user_email = "none"
+    config = _get_user_input(user_email=user_email, user_name=user_name)
 
     # 1. Remove old git history
     if git_dir.exists():
@@ -127,9 +128,7 @@ def init_new_project() -> None:
     subprocess.run([git, "init", "-b", "main"], cwd=project_root, check=True)  # noqa: S603
 
     # 3. Ask for new remote
-    new_remote = input(
-        "🔗 Enter new git remote URL (e.g., git@github.com:user/repo.git) or press Enter to skip: "
-    ).strip()
+    new_remote = config.repository_url
 
     if new_remote:
         subprocess.run([git, "remote", "add", "origin", new_remote], cwd=project_root, check=True)  # noqa: S603
@@ -154,7 +153,6 @@ def init_new_project() -> None:
 
     # 6. Update pyproject.toml with new project metadata
     print("📝 Updating pyproject.toml with new project metadata...")
-    config = _get_user_input(user_email=user_email, user_name=user_name)
     _update_pyproject_toml(config=config, project_root=project_root)
 
     # Re-run your custom hook setup script
