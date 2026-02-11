@@ -54,8 +54,6 @@ class ProjectInitializer:
     def __init__(self) -> None:
         """Initialize the project initializer with default paths and state tracking."""
         self.project_root = Path(__file__).parent.parent.resolve()  # maust be for make parent.parent
-        self.git_path: Path | None = None
-        self.uv_path: Path | None = None
         # Rollback state
         self._steps_taken: list[str] = []
 
@@ -175,23 +173,20 @@ class ProjectInitializer:
         """Initialize fresh git repo and commit."""
         logger.info("🌱 Initializing Git repository...")
 
-        self._run([str(self.git_path), "init", "-b", "main"])
+        self._run(["git", "init", "-b", "main"])
         self._steps_taken.append("git_inited")
 
         if remote_url:
-            self._run([str(self.git_path), "remote", "add", "origin", remote_url])
+            self._run(["git", "remote", "add", "origin", remote_url])
 
         logger.info("💾 Creating initial commit...")
-        self._run([str(self.git_path), "add", "."])
-        self._run([str(self.git_path), "commit", "-m", f"Initial commit for {new_name}"])
+        self._run(["git", "add", "."])
+        self._run(["git", "commit", "-m", f"Initial commit for {new_name}"])
 
     def install_environment(self) -> None:
         """Install dependencies with git hooks."""
-        logger.info("🔧 Install dependencies with githooks...")
+        logger.info("🔧 Install dependencies")
         self._run(cmd=["uv", "sync"])
-        # Todo: Add pre-commit install if needed in the future
-        # self._run(cmd=["git","init", "-b", "main"])
-        # self._run(cmd=["uv", "run", "pre-commit", "install"])
         logger.info("✅ Environment setup complete.")
 
     def cleanup_success(self) -> None:
@@ -297,6 +292,7 @@ class ProjectInitializer:
             self.update_pyproject_toml(config)
             self.install_environment()
             self.reinitialize_git(config.repository_url, config.name)
+            # self.install_git_hooks()
             self.cleanup_success()
 
         except (subprocess.CalledProcessError, ProjectInitError, OSError) as e:
