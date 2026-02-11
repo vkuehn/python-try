@@ -1,7 +1,5 @@
 """Initialize a new project from this template with rollback safety."""
 
-import contextlib
-import importlib.util
 import logging
 import shutil
 import stat
@@ -14,7 +12,7 @@ import tomlkit
 from check_git_config import check_git_config
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ProjectInitializer")
 
 
 @dataclass
@@ -55,7 +53,7 @@ class ProjectInitializer:
 
     def __init__(self) -> None:
         """Initialize the project initializer with default paths and state tracking."""
-        self.project_root = Path(__file__).parent.resolve()
+        self.project_root = Path(__file__).parent.parent.resolve()  # maust be for make parent.parent
         self.git_path: Path | None = None
         self.uv_path: Path | None = None
         # Rollback state
@@ -79,18 +77,13 @@ class ProjectInitializer:
     @property
     def pyproject_file_backup(self) -> Path:
         """Pyproject.toml backup file path."""
-        return self.pyproject_file + ".bak"
+        return self.pyproject_file.parent / f"{self.pyproject_file.name}.bak"
 
     def check_dependencies(self) -> None:
         """Verify all required tools and libraries are present."""
-        # 1. Check Python libs
-        if not (importlib.util.find_spec("tomlkit")):
-            msg = "Run 'uv sync --frozen' to install required Python libraries."
-            raise DependencyNotFoundError("tomlkit", msg)
-
         # 2. Check System tools
-        self.git_path = self._resolve_executable("git")
-        self.uv_path = self._resolve_executable("uv")
+        self._run(["which", "git"])
+        self._run(["which", "uv"])
 
         if not self.pyproject_file.exists():
             msg = f"pyproject.toml not found at {self.pyproject_file}"
@@ -139,17 +132,12 @@ class ProjectInitializer:
             path.unlink()
             return
 
-        for item in path.rglob("*"):
-            try:
-                if item.is_file():
-                    item.chmod(stat.S_IWRITE)
-                    item.unlink()
-                elif item.is_dir() and not any(item.iterdir()):
-                    item.rmdir()
-            except OSError:
-                pass
-        with contextlib.suppress(OSError):
-            path.rmdir()
+        def handle_remove_readonly(func, path_str, exc):
+            """Error handler for shutil.rmtree to handle read-only files."""
+            Path(path_str).chmod(stat.S_IWRITE)
+            func(path_str)
+
+        shutil.rmtree(path, onexc=handle_remove_readonly)
 
     def _exit_on_error(self, error: Exception, exit_code: int = 1) -> None:
         """Log error, rollback, and exit cleanly."""
@@ -183,23 +171,10 @@ class ProjectInitializer:
 
         return config
 
-    def _resolve_executable(self, name: str) -> Path:
-        """Resolve an executable path."""
-        resolved = shutil.which(name)
-        if not resolved:
-            raise DependencyNotFoundError(name)
-        return Path(resolved).absolute()
-
     def reinitialize_git(self, remote_url: str, new_name: str) -> None:
         """Initialize fresh git repo and commit."""
         logger.info("🌱 Initializing Git repository...")
 
-        # Clean old venv if exists
-        venv_dir = self.project_root / ".venv"
-        if venv_dir.exists():
-            self._delete_path(venv_dir)
-
-        # Init
         self._run([str(self.git_path), "init", "-b", "main"])
         self._steps_taken.append("git_inited")
 
@@ -211,10 +186,13 @@ class ProjectInitializer:
         self._run([str(self.git_path), "commit", "-m", f"Initial commit for {new_name}"])
 
     def install_environment(self) -> None:
-        """Sync uv environment and install hooks."""
-        logger.info("🪝  Rebuilding environment and hooks...")
-        self._run([str(self.uv_path), "sync", "--frozen"])
-        self._run([str(self.uv_path), "run", "pre-commit", "install"])
+        """Install dependencies with git hooks."""
+        logger.info("🔧 Install dependencies with githooks...")
+        self._run(cmd=["uv", "sync"])
+        # Todo: Add pre-commit install if needed in the future
+        # self._run(cmd=["git","init", "-b", "main"])
+        # self._run(cmd=["uv", "run", "pre-commit", "install"])
+        logger.info("✅ Environment setup complete.")
 
     def cleanup_success(self) -> None:
         """Remove backups after successful run."""
@@ -247,7 +225,18 @@ class ProjectInitializer:
 
     def _run(self, cmd: list[str]) -> None:
         """Execute subprocess command securely."""
-        subprocess.run(cmd, cwd=self.project_root, check=True, shell=False)  # noqa: S603
+        print(f"Running: {' '.join(cmd)} in {self.project_root}")
+        try:
+            subprocess.run(  # noqa: S603  # shell=False, cmd is a validated list built internally
+                cmd,
+                capture_output=True,
+                text=True,
+                check=True,
+                shell=False,
+            )
+        except subprocess.CalledProcessError as e:
+            msg = f"Command '{' '.join(cmd)}' failed with error: {e.stderr.strip()}"
+            raise ProjectInitError(msg) from e
 
     def update_pyproject_toml(self, config: ProjectConfig) -> None:
         """Update authors, version, and description in pyproject.toml.
@@ -306,8 +295,8 @@ class ProjectInitializer:
             self.backup_git_history()
             self.backup_pyproject_toml(self.pyproject_file)
             self.update_pyproject_toml(config)
-            self.reinitialize_git(config.repository_url, config.name)
             self.install_environment()
+            self.reinitialize_git(config.repository_url, config.name)
             self.cleanup_success()
 
         except (subprocess.CalledProcessError, ProjectInitError, OSError) as e:
