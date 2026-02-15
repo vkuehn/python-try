@@ -5,6 +5,9 @@ build: clean-build ## Build wheel file using uv and .venv
 
 .PHONY: check
 check: ## Run code quality tools and project checks.
+	@echo "🚀 Cleaning previous tox and mypy artifacts"
+	@rm -rf .tox
+	@rm -rf .mypy_cache
 	@echo "🚀 Running checks via tox (uv.lock)"
 	@uv run tox -e outdated,fix,lint,type,py314
 

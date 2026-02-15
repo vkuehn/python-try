@@ -61,7 +61,7 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 
 # ToDo
 
-- remove all python_try left overs
+- remove all python_try left overs in code and documentation and config files
 - rename complete folder and subfolder
 - recreate .venv folder
 - Ensure pipelines are stable in all situations
@@ -71,4 +71,4 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 
 Run devcontainer locally:
 ```bash
-podman run -it --rm -v "$(pwd):/workspaces/python-try:Z" -w /workspaces/python-try [mcr.microsoft.com/devcontainers/python:3.14-bookworm](https://mcr.microsoft.com/devcontainers/python:3.14-bookworm) bash
+docker run -it --rm -v "$(pwd):/workspaces/python-try:Z" -w /workspaces/python-try [mcr.microsoft.com/devcontainers/python:3.14-bookworm](https://mcr.microsoft.com/devcontainers/python:3.14-bookworm) bash
