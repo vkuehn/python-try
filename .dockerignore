@@ -1,0 +1,33 @@
+# Git
+.git
+.gitignore
+
+# Python / Environment
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.tox
+.mypy_cache
+.pytest_cache
+.coverage
+htmlcov
+dist
+
+# VS Code
+.vscode
+.devcontainer
+
+# Environment variables (Sicherheitsrisiko im Image!)
+.env
+.dev.env
+
+# Documentation
+docs
+site
+mkdocs.yml
+
+# Tooling configs (optional, aber im Final Image oft unnötig)
+tox.ini
+Makefile
