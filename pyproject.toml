@@ -1,11 +1,13 @@
 [project]
 name = "python_try"
-version = "0.0.2"
+version = "0.0.5"
 description = "This is a template repository for Python projects"
 authors = [{ name = "Volker Kuehn", email = "vkuehn@more-machines.org" }]
 requires-python = ">=3.14,<4.0"
 readme = "README.md"
-[dependencies]
+dependencies = []  # this is a template project
+
+[dependency-groups]
 dev = [
     "pre-commit>=4.2.0",
     "python-semantic-release>=9.0.0",
@@ -29,6 +31,10 @@ docs = [
 [project.urls]
 Documentation = "https://vkuehn.github.io/python-try/"
 Repository = "https://github.com/vkuehn/python-try"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [tool.uv]
 package = true # Enable package management (default is true)
@@ -81,18 +87,9 @@ upload_to_pypi = false
 changelog_file = "CHANGELOG.md"
 build_command = "uv build --out-dir dist/"
 
-[tool.coverage.report]
-skip_empty = true
-
 [tool.coverage.run]
 branch = true
 source = ["python_try"]
-
-[dependency-groups]
-dev = [
-    "pre-commit>=4.2.0",
-    "python-semantic-release>=9.0.0",
-]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101"]
