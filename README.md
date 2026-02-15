@@ -61,6 +61,9 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 
 # ToDo
 
+- remove all python_try left overs
+- rename complete folder and subfolder
+- recreate .venv folder
 - Ensure pipelines are stable in all situations
 - Refine release scripts
 

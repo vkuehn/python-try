@@ -41,14 +41,16 @@ install: ## Install the uv environment
 	@uv export --format requirements.txt --frozen --no-hashes --no-emit-project --output-file requirements.txt
 	@uv run pre-commit install
 	@echo "🚀 Setting up git hooks"
-	@uv run pre-commit install-hooks
+	@uv run pre-commit install
 	@uv run ./scripts/setup_hook_commit_message.py
 
 
 .PHONY: update
 update: ## Run update of dependencies
+	@echo "🚀 Upgrading dependencies in uv.lock"
+	@uv lock --upgrade
 	@echo "🚀 Updating project with uv"
-	@uv sync --upgrade
+	@uv sync --all-groups
 	@echo "🚀 make sure a requirements is upgraded also"
 	@uv export --format requirements.txt --frozen --no-hashes --no-emit-project --output-file requirements.txt
 
