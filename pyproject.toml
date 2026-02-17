@@ -29,7 +29,7 @@ Repository = "https://github.com/vkuehn/python-try"
 package = true # Enable package management (default is true)
 
 [tool.mypy]
-files = ["python_try"]
+files = ["src/python_try"]
 disallow_any_unimported = true
 no_implicit_optional = true
 check_untyped_defs = true
@@ -81,7 +81,7 @@ skip_empty = true
 
 [tool.coverage.run]
 branch = true
-source = ["python_try"]
+source = ["src/python_try"]
 
 [dependency-groups]
 dev = [
@@ -95,6 +95,3 @@ dev = [
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"  # Enforce Google-style docstrings
-
-[tool.setuptools]
-packages = ["python_try"]
