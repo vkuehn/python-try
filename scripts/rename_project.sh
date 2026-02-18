@@ -65,5 +65,22 @@ uv sync
 echo "🔧 Updating project configuration with new name..."
 uv run python scripts/init_new_project.py --name "$NEW_NAME"
 
+# -- 6. remove old .venv if it still exists (safety check) ---
+if [ -d ".venv" ]; then
+    echo "🧹 Removing old .venv (safety check)..."
+    rm -rf .venv
+fi
 
+# --- 7. Create fresh environment and install git hooks ---
+echo "🪝  Creating fresh environment and installing git hooks..."
+uv sync --frozen
+uv run pre-commit install
+
+# Re-run custom hook setup script
+if [ -f "scripts/setup_hook_commit_message.py" ]; then
+    uv run python scripts/setup_hook_commit_message.py
+fi
+
+cd ..
+cd "$NEW_NAME"
 echo "✅ Done! Your project is now located at: $(pwd)"

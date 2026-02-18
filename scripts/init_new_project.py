@@ -321,7 +321,6 @@ def init_new_project(project_name: str | None = None) -> None:
     git_dir = project_root / ".git"
 
     git = _resolve_executable("git")
-    uv = _resolve_executable("uv")
 
     print("⚠️  WARNING: This will delete the entire git history of this project!")
     print("    It is intended for starting a NEW project from this template.")
@@ -386,17 +385,7 @@ def init_new_project(project_name: str | None = None) -> None:
         check=True,
     )
 
-    # 8. Create fresh environment and install git hooks
-    print("🪝  Creating fresh environment and installing git hooks...")
-    subprocess.run([uv, "sync", "--frozen"], cwd=project_root, check=False)  # noqa: S603
-    subprocess.run([uv, "run", "pre-commit", "install"], cwd=project_root, check=False)  # noqa: S603
-
-    # Re-run your custom hook setup script
-    setup_hook = project_root / "scripts" / "setup_hook_commit_message.py"
-    if setup_hook.exists():
-        subprocess.run([uv, "run", str(setup_hook)], cwd=project_root)  # noqa: S603
-
-    print("\n✨ Project ready! You can now push to your new origin.")
+    print("\n✨ You can now push to your new origin.")
 
 
 if __name__ == "__main__":
