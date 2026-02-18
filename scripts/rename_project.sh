@@ -54,32 +54,16 @@ mv "$CURRENT_DIR_NAME" "$NEW_NAME"
 cd "$NEW_NAME"
 
 
-# --- 4. Re-initialization (Bootstrap) ---
-echo "💎 Creating new environment (uv sync)..."
-# Here uv is forced to rebuild the .venv.
-# Since we're in the new path, all references are correct.
-uv sync
-
-
-# --- 5. Update project metadata and references ---
+# --- 4. Update project metadata and references ---
 echo "🔧 Updating project configuration with new name..."
 uv run python scripts/init_new_project.py --name "$NEW_NAME"
 
-# -- 6. remove old .venv if it still exists (safety check) ---
-if [ -d ".venv" ]; then
-    echo "🧹 Removing old .venv (safety check)..."
-    rm -rf .venv
-fi
-
-# --- 7. Create fresh environment and install git hooks ---
-echo "🪝  Creating fresh environment and installing git hooks..."
-uv sync --frozen
+# --- 5. Update lockfile and create fresh environment ---
+echo "🪝  Updating lockfile and creating fresh environment..."
+uv lock
+uv sync
 uv run pre-commit install
-
-# Re-run custom hook setup script
-if [ -f "scripts/setup_hook_commit_message.py" ]; then
-    uv run python scripts/setup_hook_commit_message.py
-fi
+uv run python scripts/setup_hook_commit_message.py
 
 cd ..
 cd "$NEW_NAME"
