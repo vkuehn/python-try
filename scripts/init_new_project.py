@@ -4,6 +4,7 @@ This script removes the existing `.git` history and initializes a fresh git
 repository. Optionally, it can attach a new `origin` remote.
 """
 
+import argparse
 import shutil
 import subprocess
 import sys
@@ -261,8 +262,29 @@ def _update_tox_ini(old_name: str, new_name: str, project_root: Path) -> None:
     print("⚙️  Updated tox.ini")
 
 
-def _get_user_input(user_email: str, user_name: str) -> ProjectConfig:
-    name = input("🔗 New project name (Enter): ").strip()
+def _get_user_input(user_email: str, user_name: str, project_name: str | None = None) -> ProjectConfig:
+    """Gather project configuration from user input or arguments.
+
+    Parameters
+    ----------
+    user_email : str
+        Default email from git config.
+    user_name : str
+        Default author name from git config.
+    project_name : str | None
+        Optional project name from command-line arguments.
+
+    Returns:
+    -------
+    ProjectConfig
+        Complete project configuration.
+    """
+    if project_name:
+        name = project_name
+        print(f"📝 Using project name: {name}")
+    else:
+        name = input("🔗 New project name (Enter): ").strip()
+
     author = input(f"🔗 Author name [{user_name}]: ").strip() or user_name
     email = input(f"🔗 Author email [{user_email}]: ").strip() or user_email
 
@@ -287,8 +309,14 @@ def _get_user_input(user_email: str, user_name: str) -> ProjectConfig:
     return config
 
 
-def init_new_project() -> None:
-    """Remove the existing git history and initialize a fresh repository."""
+def init_new_project(project_name: str | None = None) -> None:
+    """Remove the existing git history and initialize a fresh repository.
+
+    Parameters
+    ----------
+    project_name : str | None
+        Optional project name from command-line arguments.
+    """
     project_root = Path(__file__).parent.parent
     git_dir = project_root / ".git"
 
@@ -310,7 +338,7 @@ def init_new_project() -> None:
     except subprocess.CalledProcessError:
         user_name = "none"
         user_email = "none"
-    config = _get_user_input(user_email=user_email, user_name=user_name)
+    config = _get_user_input(user_email=user_email, user_name=user_name, project_name=project_name)
 
     # 1. Remove old git history
     if git_dir.exists():
@@ -358,15 +386,9 @@ def init_new_project() -> None:
         check=True,
     )
 
-    # 8. Clean up old environment and sync with new project name
-    venv_dir = project_root / ".venv"
-    if venv_dir.exists():
-        print("🗑️  Cleaning up old virtual environment...")
-        shutil.rmtree(venv_dir, ignore_errors=True)
-
-    # 9. Create fresh environment and install git hooks
+    # 8. Create fresh environment and install git hooks
     print("🪝  Creating fresh environment and installing git hooks...")
-    subprocess.run([uv, "sync"], cwd=project_root, check=False)  # noqa: S603
+    subprocess.run([uv, "sync", "--frozen"], cwd=project_root, check=False)  # noqa: S603
     subprocess.run([uv, "run", "pre-commit", "install"], cwd=project_root, check=False)  # noqa: S603
 
     # Re-run your custom hook setup script
@@ -378,4 +400,12 @@ def init_new_project() -> None:
 
 
 if __name__ == "__main__":
-    init_new_project()
+    parser = argparse.ArgumentParser(description="Initialize a new project from the python-try template.")
+    parser.add_argument(
+        "--name",
+        "-n",
+        type=str,
+        help="Project name (if not provided, will prompt interactively)",
+    )
+    args = parser.parse_args()
+    init_new_project(project_name=args.name)
