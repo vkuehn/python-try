@@ -39,7 +39,9 @@ init-project: ## Nuke old git history and start a fresh project with new origin
 		echo "❌ Error: No project name provided"; \
 		exit 1; \
 	fi; \
-	bash -c ". scripts/rename_project.sh \"$$NEW_NAME\""
+	echo "🚀 Initializing new project with name: $$NEW_NAME"; \
+	echo "make can't run the rename script directly!!"; \
+	echo ". scripts/rename_project.sh \"$$NEW_NAME\""; \
 
 .PHONY: install
 install: ## Install the uv environment
