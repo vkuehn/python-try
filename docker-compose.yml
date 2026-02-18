@@ -1,0 +1,35 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: python-try:latest
+    container_name: python-try-app
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Override command for interactive mode
+    # command: tail -f /dev/null
+
+  dev:
+    image: mcr.microsoft.com/devcontainers/python:3.14-bookworm
+    container_name: python-try-dev
+    volumes:
+      # Mount the entire workspace
+      - .:/workspaces/python-try:cached
+      # Preserve venv, cache directories
+      - python-try-venv:/workspaces/python-try/.venv
+      - python-try-uv-cache:/root/.cache/uv
+    working_dir: /workspaces/python-try
+    command: sleep infinity
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Enable ptrace for debuggers
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+
+volumes:
+  python-try-venv:
+  python-try-uv-cache:

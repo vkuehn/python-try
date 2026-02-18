@@ -40,7 +40,7 @@ build-backend = "setuptools.build_meta"
 package = true # Enable package management (default is true)
 
 [tool.mypy]
-files = ["python_try"]
+files = ["src/python_try"]
 disallow_any_unimported = true
 no_implicit_optional = true
 check_untyped_defs = true
@@ -89,7 +89,7 @@ build_command = "uv build --out-dir dist/"
 
 [tool.coverage.run]
 branch = true
-source = ["python_try"]
+source = ["src/python_try"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101"]
@@ -97,6 +97,3 @@ source = ["python_try"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"  # Enforce Google-style docstrings
-
-[tool.setuptools]
-packages = ["python_try"]

@@ -12,6 +12,16 @@ It is based on standard best practices for modern Python development.
 - **GitHub repository**: <https://github.com/vkuehn/python-try/>
 - **Documentation** <https://vkuehn.github.io/python-try/>
 
+## Project Structure
+
+Uses standard **src-layout**:
+```
+python-try/
+├── src/python_try/     # Package source code
+├── tests/              # Test files
+└── pyproject.toml
+```
+
 ## Getting started with your project
 
 To start a new project using this template:
@@ -34,7 +44,7 @@ To start a new project using this template:
     ```
 
 4.  **Rename and Configure**:
-    - Rename the source folder `python_try` to your project name.
+    - Rename the package folder `src/python_try` to your project name.
     - Update `pyproject.toml` with your project's name, version, and authors.
     - Update `mkdocs.yml` with your project name and repository URL.
     - Push your first commit: `git push -u origin main`
@@ -53,6 +63,7 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 - **MkDocs** for source code documentation (see `mkdocs.yml`)
 - **Pre-commit hooks** for code quality (see `.pre-commit-config.yaml`)
 - **Ruff** for linting and formatting
+- **Docker** with optimized Dockerfile and docker-compose setup
 - **Scripts** folder collecting helper functions
 - **Pipelines**:
   - `on-release-main`:
@@ -69,6 +80,14 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 
 # Devcontainer
 
-Run devcontainer locally:
+**VS Code**: Reopen in Container
+
+**Docker Compose**:
 ```bash
-docker run -it --rm -v "$(pwd):/workspaces/python-try:Z" -w /workspaces/python-try [mcr.microsoft.com/devcontainers/python:3.14-bookworm](https://mcr.microsoft.com/devcontainers/python:3.14-bookworm) bash
+docker-compose up dev
+```
+
+**Podman**:
+```bash
+podman run -it --rm -v "$(pwd):/workspaces/python-try:Z" -w /workspaces/python-try mcr.microsoft.com/devcontainers/python:3.14-bookworm bash
+```

@@ -8,13 +8,6 @@ Note:
     Each test function focuses on a specific aspect of the tested code.
 """
 
-import os
-import sys
-
-# we need this for git pipeline testing
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-# pylint: disable=C0413
 from python_try.main import main
 
 
