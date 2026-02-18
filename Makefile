@@ -39,7 +39,7 @@ init-project: ## Nuke old git history and start a fresh project with new origin
 		echo "❌ Error: No project name provided"; \
 		exit 1; \
 	fi; \
-	. scripts/rename_project.sh "$$NEW_NAME"
+	bash -c ". scripts/rename_project.sh \"$$NEW_NAME\""
 
 .PHONY: install
 install: ## Install the uv environment
