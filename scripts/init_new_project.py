@@ -62,9 +62,56 @@ def _update_pyproject_toml(config: ProjectConfig, project_root: Path) -> None:
     pyproject_data["project"]["urls"]["Documentation"] = config.documentation_url
     pyproject_data["project"]["urls"]["Repository"] = config.repository_url
 
+    # Update tool configs for new package name
+    pyproject_data["tool"]["mypy"]["files"] = [f"src/{config.name}"]
+    pyproject_data["tool"]["coverage"]["run"]["source"] = [f"src/{config.name}"]
+
     # Write the updated data back to the pyproject.toml file
     with open(pyproject_file, "w") as file:
         tomlkit.dump(pyproject_data, file)
+
+
+def _rename_package_directory(old_name: str, new_name: str, project_root: Path) -> None:
+    """Rename the package directory from old_name to new_name.
+
+    Parameters
+    ----------
+    old_name : str
+        The current package name.
+    new_name : str
+        The new package name.
+    project_root : Path
+        The root directory of the project.
+    """
+    old_path = project_root / "src" / old_name
+    new_path = project_root / "src" / new_name
+
+    if old_path.exists():
+        old_path.rename(new_path)
+        print(f"📦 Renamed package: src/{old_name} -> src/{new_name}")
+
+
+def _update_devcontainer(old_name: str, new_name: str, project_root: Path) -> None:
+    """Update project name references in devcontainer.json.
+
+    Parameters
+    ----------
+    old_name : str
+        The old project name to replace.
+    new_name : str
+        The new project name.
+    project_root : Path
+        The root directory of the project.
+    """
+    devcontainer_file = project_root / ".devcontainer" / "devcontainer.json"
+    if not devcontainer_file.exists():
+        return
+
+    content = devcontainer_file.read_text()
+    content = content.replace(f'"name": "{old_name}"', f'"name": "{new_name}"')
+    content = content.replace(f"/workspaces/{old_name}", f"/workspaces/{new_name}")
+    devcontainer_file.write_text(content)
+    print(f"🐳 Updated devcontainer.json: {old_name} -> {new_name}")
 
 
 def _get_user_input(user_email: str, user_name: str) -> ProjectConfig:
@@ -151,9 +198,15 @@ def init_new_project() -> None:
     subprocess.run([uv, "sync", "--frozen"], cwd=project_root, check=False)  # noqa: S603
     subprocess.run([uv, "run", "pre-commit", "install"], cwd=project_root, check=False)  # noqa: S603
 
-    # 6. Update pyproject.toml with new project metadata
+    # 6. Rename package directory
+    _rename_package_directory(old_name="python_try", new_name=config.name, project_root=project_root)
+
+    # 7. Update pyproject.toml with new project metadata
     print("📝 Updating pyproject.toml with new project metadata...")
     _update_pyproject_toml(config=config, project_root=project_root)
+
+    # 8. Update devcontainer configuration
+    _update_devcontainer(old_name="python-try", new_name=config.name, project_root=project_root)
 
     # Re-run your custom hook setup script
     setup_hook = project_root / "scripts" / "setup_hook_commit_message.py"

@@ -2,8 +2,11 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
     "name": "python-try",
-    // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-    "image": "mcr.microsoft.com/devcontainers/python:3.14-bookworm",
+
+    // Use docker-compose for better development workflow
+    "dockerComposeFile": "../docker-compose.yml",
+    "service": "dev",
+    "workspaceFolder": "/workspaces/python-try",
 
     // Use 'postCreateCommand' to run commands after the container is created.
     "postCreateCommand": [
