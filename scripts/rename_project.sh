@@ -3,13 +3,20 @@
 # 🛑 Fail Fast:
 set -e
 
+safe_exit() {
+    if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+        return 1 # If sourced
+    else
+        exit 1   # If executed
+    fi
+}
+
 # --- 1. Validation ---
 NEW_NAME="$1"
 
 if [ -z "$NEW_NAME" ]; then
     echo "❌ Error: No new name specified."
-    echo "Usage: ./rename_project.sh <new-project-name>"
-    exit 1
+    safe_exit
 fi
 
 # Find current directory name and parent directory
@@ -41,7 +48,7 @@ rm -rf .ruff_cache .pytest_cache __pycache__
 # Check if target already exists
 if [ -d "../$NEW_NAME" ]; then
     echo "❌ Error: A folder named '$NEW_NAME' already exists in the parent directory!"
-    exit 1
+    safe_exit
 fi
 
 echo "📦 Renaming directory..."
