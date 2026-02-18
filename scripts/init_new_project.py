@@ -330,29 +330,14 @@ def init_new_project() -> None:
     else:
         print("INFO: Skipping remote setup. You can add it later with 'git remote add origin <url>'")
 
-    # 4. Initial commit
-    print("📦 Creating initial commit...")
-    subprocess.run([git, "add", "."], cwd=project_root, check=True)  # noqa: S603
-    subprocess.run(  # noqa: S603
-        [git, "commit", "-m", f"Initial commit from {config.name} template"],
-        cwd=project_root,
-        check=True,
-    )
-
-    # 5. Re-install hooks (since .git was deleted, hooks are gone)
-    print("🪝  Re-installing git hooks...")
-    # Ensure uv is ready
-    subprocess.run([uv, "sync", "--frozen"], cwd=project_root, check=False)  # noqa: S603
-    subprocess.run([uv, "run", "pre-commit", "install"], cwd=project_root, check=False)  # noqa: S603
-
-    # 6. Rename package directory
+    # 4. Rename package directory
     _rename_package_directory(old_name="python_try", new_name=config.name, project_root=project_root)
 
-    # 7. Update pyproject.toml with new project metadata
+    # 5. Update pyproject.toml with new project metadata
     print("📝 Updating pyproject.toml with new project metadata...")
     _update_pyproject_toml(config=config, project_root=project_root)
 
-    # 8. Update all template references to old project names
+    # 6. Update all template references to old project names
     old_name_dash = "python-try"
     new_name_dash = config.name.replace("_", "-")
 
@@ -363,6 +348,26 @@ def init_new_project() -> None:
     _update_docker_compose(old_name_dash=old_name_dash, new_name_dash=new_name_dash, project_root=project_root)
     _update_makefile(old_name_dash=old_name_dash, new_name_dash=new_name_dash, project_root=project_root)
     _update_tox_ini(old_name="python_try", new_name=config.name, project_root=project_root)
+
+    # 7. Initial commit with all updated configs
+    print("📦 Creating initial commit...")
+    subprocess.run([git, "add", "."], cwd=project_root, check=True)  # noqa: S603
+    subprocess.run(  # noqa: S603
+        [git, "commit", "-m", f"Initial commit from {config.name} template"],
+        cwd=project_root,
+        check=True,
+    )
+
+    # 8. Clean up old environment and sync with new project name
+    venv_dir = project_root / ".venv"
+    if venv_dir.exists():
+        print("🗑️  Cleaning up old virtual environment...")
+        shutil.rmtree(venv_dir, ignore_errors=True)
+
+    # 9. Create fresh environment and install git hooks
+    print("🪝  Creating fresh environment and installing git hooks...")
+    subprocess.run([uv, "sync"], cwd=project_root, check=False)  # noqa: S603
+    subprocess.run([uv, "run", "pre-commit", "install"], cwd=project_root, check=False)  # noqa: S603
 
     # Re-run your custom hook setup script
     setup_hook = project_root / "scripts" / "setup_hook_commit_message.py"
