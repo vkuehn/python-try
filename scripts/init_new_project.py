@@ -4,6 +4,7 @@ This script removes the existing `.git` history and initializes a fresh git
 repository. Optionally, it can attach a new `origin` remote.
 """
 
+import argparse
 import shutil
 import subprocess
 import sys
@@ -40,13 +41,13 @@ def _update_pyproject_toml(config: ProjectConfig, project_root: Path) -> None:
     ----------
     config : ProjectConfig
         Configuration object containing all project metadata.
+    project_root : Path
+        The root directory of the project.
     """
     pyproject_file = project_root / "pyproject.toml"
-    with open(pyproject_file) as file:
-        pyproject_data = tomlkit.load(file)
+    pyproject_data = tomlkit.loads(pyproject_file.read_text())
 
     # Update the project owner, version, and description
-
     authors_array = tomlkit.array()
     for author in config.authors:
         inline_table = tomlkit.inline_table()
@@ -67,8 +68,7 @@ def _update_pyproject_toml(config: ProjectConfig, project_root: Path) -> None:
     pyproject_data["tool"]["coverage"]["run"]["source"] = [f"src/{config.name}"]
 
     # Write the updated data back to the pyproject.toml file
-    with open(pyproject_file, "w") as file:
-        tomlkit.dump(pyproject_data, file)
+    pyproject_file.write_text(tomlkit.dumps(pyproject_data))
 
 
 def _rename_package_directory(old_name: str, new_name: str, project_root: Path) -> None:
@@ -114,8 +114,177 @@ def _update_devcontainer(old_name: str, new_name: str, project_root: Path) -> No
     print(f"🐳 Updated devcontainer.json: {old_name} -> {new_name}")
 
 
-def _get_user_input(user_email: str, user_name: str) -> ProjectConfig:
-    name = input("🔗 New project name (Enter): ").strip()
+def _update_readme(old_name_dash: str, new_name_dash: str, project_root: Path) -> None:
+    """Update project name references in README.md.
+
+    Parameters
+    ----------
+    old_name_dash : str
+        The old project name with dashes (e.g., python-try).
+    new_name_dash : str
+        The new project name with dashes.
+    project_root : Path
+        The root directory of the project.
+    """
+    readme_file = project_root / "README.md"
+    if not readme_file.exists():
+        return
+
+    content = readme_file.read_text()
+    content = content.replace(f"# {old_name_dash}", f"# {new_name_dash}")
+    content = content.replace("python-try/", f"{new_name_dash}/")
+    content = content.replace(old_name_dash, new_name_dash)
+
+    readme_file.write_text(content)
+    print("📖 Updated README.md")
+
+
+def _update_mkdocs_yml(old_name_dash: str, new_name_dash: str, project_root: Path) -> None:
+    """Update site name and URLs in mkdocs.yml.
+
+    Parameters
+    ----------
+    old_name_dash : str
+        The old project name with dashes.
+    new_name_dash : str
+        The new project name with dashes.
+    project_root : Path
+        The root directory of the project.
+    """
+    mkdocs_file = project_root / "mkdocs.yml"
+    if not mkdocs_file.exists():
+        return
+
+    content = mkdocs_file.read_text()
+    content = content.replace(f"site_name: {old_name_dash}", f"site_name: {new_name_dash}")
+    content = content.replace("/python-try", f"/{new_name_dash}")
+    content = content.replace(f"/{old_name_dash}", f"/{new_name_dash}")
+
+    mkdocs_file.write_text(content)
+    print("🌐 Updated mkdocs.yml")
+
+
+def _update_dockerfile(old_name: str, new_name: str, project_root: Path) -> None:
+    """Update package import in Dockerfile.
+
+    Parameters
+    ----------
+    old_name : str
+        The old package name with underscores.
+    new_name : str
+        The new package name with underscores.
+    project_root : Path
+        The root directory of the project.
+    """
+    dockerfile = project_root / "Dockerfile"
+    if not dockerfile.exists():
+        return
+
+    content = dockerfile.read_text()
+    content = content.replace(f"from {old_name}.main", f"from {new_name}.main")
+
+    dockerfile.write_text(content)
+    print("🐳 Updated Dockerfile")
+
+
+def _update_docker_compose(old_name_dash: str, new_name_dash: str, project_root: Path) -> None:
+    """Update project name references in docker-compose.yml.
+
+    Parameters
+    ----------
+    old_name_dash : str
+        The old project name with dashes.
+    new_name_dash : str
+        The new project name with dashes.
+    project_root : Path
+        The root directory of the project.
+    """
+    docker_compose_file = project_root / "docker-compose.yml"
+    if not docker_compose_file.exists():
+        return
+
+    content = docker_compose_file.read_text()
+    content = content.replace(f"image: {old_name_dash}:latest", f"image: {new_name_dash}:latest")
+    content = content.replace(f"container_name: {old_name_dash}-app", f"container_name: {new_name_dash}-app")
+    content = content.replace(f"container_name: {old_name_dash}-dev", f"container_name: {new_name_dash}-dev")
+    content = content.replace(f"/workspaces/{old_name_dash}", f"/workspaces/{new_name_dash}")
+    content = content.replace(f"{old_name_dash}-venv", f"{new_name_dash}-venv")
+    content = content.replace(f"{old_name_dash}-uv-cache", f"{new_name_dash}-uv-cache")
+
+    docker_compose_file.write_text(content)
+    print("🐳 Updated docker-compose.yml")
+
+
+def _update_makefile(old_name_dash: str, new_name_dash: str, project_root: Path) -> None:
+    """Update Docker image tag in Makefile.
+
+    Parameters
+    ----------
+    old_name_dash : str
+        The old project name with dashes.
+    new_name_dash : str
+        The new project name with dashes.
+    project_root : Path
+        The root directory of the project.
+    """
+    makefile = project_root / "Makefile"
+    if not makefile.exists():
+        return
+
+    content = makefile.read_text()
+    content = content.replace(f"-t {old_name_dash}", f"-t {new_name_dash}")
+
+    makefile.write_text(content)
+    print("🏗️  Updated Makefile")
+
+
+def _update_tox_ini(old_name: str, new_name: str, project_root: Path) -> None:
+    """Update package paths in tox.ini.
+
+    Parameters
+    ----------
+    old_name : str
+        The old package name with underscores.
+    new_name : str
+        The new package name with underscores.
+    project_root : Path
+        The root directory of the project.
+    """
+    tox_file = project_root / "tox.ini"
+    if not tox_file.exists():
+        return
+
+    content = tox_file.read_text()
+    content = content.replace(f"src/{old_name}", f"src/{new_name}")
+    content = content.replace(f"./{old_name}", f"./{new_name}")
+
+    tox_file.write_text(content)
+    print("⚙️  Updated tox.ini")
+
+
+def _get_user_input(user_email: str, user_name: str, project_name: str | None = None) -> ProjectConfig:
+    """Gather project configuration from user input or arguments.
+
+    Parameters
+    ----------
+    user_email : str
+        Default email from git config.
+    user_name : str
+        Default author name from git config.
+    project_name : str | None
+        Optional project name from command-line arguments.
+
+    Returns:
+    -------
+    ProjectConfig
+        Complete project configuration.
+    """
+    if project_name:
+        name = project_name
+        print(f"📝 Using project name: {name}")
+    else:
+        name = input("🔗 New project name (Enter): ").strip()
+
     author = input(f"🔗 Author name [{user_name}]: ").strip() or user_name
     email = input(f"🔗 Author email [{user_email}]: ").strip() or user_email
 
@@ -140,13 +309,18 @@ def _get_user_input(user_email: str, user_name: str) -> ProjectConfig:
     return config
 
 
-def init_new_project() -> None:
-    """Remove the existing git history and initialize a fresh repository."""
+def init_new_project(project_name: str | None = None) -> None:
+    """Remove the existing git history and initialize a fresh repository.
+
+    Parameters
+    ----------
+    project_name : str | None
+        Optional project name from command-line arguments.
+    """
     project_root = Path(__file__).parent.parent
     git_dir = project_root / ".git"
 
     git = _resolve_executable("git")
-    uv = _resolve_executable("uv")
 
     print("⚠️  WARNING: This will delete the entire git history of this project!")
     print("    It is intended for starting a NEW project from this template.")
@@ -163,7 +337,7 @@ def init_new_project() -> None:
     except subprocess.CalledProcessError:
         user_name = "none"
         user_email = "none"
-    config = _get_user_input(user_email=user_email, user_name=user_name)
+    config = _get_user_input(user_email=user_email, user_name=user_name, project_name=project_name)
 
     # 1. Remove old git history
     if git_dir.exists():
@@ -183,38 +357,44 @@ def init_new_project() -> None:
     else:
         print("INFO: Skipping remote setup. You can add it later with 'git remote add origin <url>'")
 
-    # 4. Initial commit
+    # 4. Rename package directory
+    _rename_package_directory(old_name="python_try", new_name=config.name, project_root=project_root)
+
+    # 5. Update pyproject.toml with new project metadata
+    print("📝 Updating pyproject.toml with new project metadata...")
+    _update_pyproject_toml(config=config, project_root=project_root)
+
+    # 6. Update all template references to old project names
+    old_name_dash = "python-try"
+    new_name_dash = config.name.replace("_", "-")
+
+    _update_devcontainer(old_name="python-try", new_name=new_name_dash, project_root=project_root)
+    _update_readme(old_name_dash=old_name_dash, new_name_dash=new_name_dash, project_root=project_root)
+    _update_mkdocs_yml(old_name_dash=old_name_dash, new_name_dash=new_name_dash, project_root=project_root)
+    _update_dockerfile(old_name="python_try", new_name=config.name, project_root=project_root)
+    _update_docker_compose(old_name_dash=old_name_dash, new_name_dash=new_name_dash, project_root=project_root)
+    _update_makefile(old_name_dash=old_name_dash, new_name_dash=new_name_dash, project_root=project_root)
+    _update_tox_ini(old_name="python_try", new_name=config.name, project_root=project_root)
+
+    # 7. Initial commit with all updated configs
     print("📦 Creating initial commit...")
     subprocess.run([git, "add", "."], cwd=project_root, check=True)  # noqa: S603
     subprocess.run(  # noqa: S603
-        [git, "commit", "-m", "Initial commit from python-try template"],
+        [git, "commit", "-m", f"Initial commit from {config.name} template"],
         cwd=project_root,
         check=True,
     )
 
-    # 5. Re-install hooks (since .git was deleted, hooks are gone)
-    print("🪝  Re-installing git hooks...")
-    # Ensure uv is ready
-    subprocess.run([uv, "sync", "--frozen"], cwd=project_root, check=False)  # noqa: S603
-    subprocess.run([uv, "run", "pre-commit", "install"], cwd=project_root, check=False)  # noqa: S603
-
-    # 6. Rename package directory
-    _rename_package_directory(old_name="python_try", new_name=config.name, project_root=project_root)
-
-    # 7. Update pyproject.toml with new project metadata
-    print("📝 Updating pyproject.toml with new project metadata...")
-    _update_pyproject_toml(config=config, project_root=project_root)
-
-    # 8. Update devcontainer configuration
-    _update_devcontainer(old_name="python-try", new_name=config.name, project_root=project_root)
-
-    # Re-run your custom hook setup script
-    setup_hook = project_root / "scripts" / "setup_hook_commit_message.py"
-    if setup_hook.exists():
-        subprocess.run([uv, "run", str(setup_hook)], cwd=project_root)  # noqa: S603
-
-    print("\n✨ Project ready! You can now push to your new origin.")
+    print("\n✨ You can now push to your new origin.")
 
 
 if __name__ == "__main__":
-    init_new_project()
+    parser = argparse.ArgumentParser(description="Initialize a new project from the python-try template.")
+    parser.add_argument(
+        "--name",
+        "-n",
+        type=str,
+        help="Project name (if not provided, will prompt interactively)",
+    )
+    args = parser.parse_args()
+    init_new_project(project_name=args.name)

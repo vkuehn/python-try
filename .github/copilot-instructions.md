@@ -5,7 +5,7 @@ These instructions apply to contributions in this repository.
 ## Project context
 
 - Language/runtime: Python **3.14** (see `pyproject.toml`).
-- Package: `python_try/`.
+- Package: `src/python_try/`.
 - Tests: `tests/` with **pytest**.
 - Tooling:
   - Dependency management / runner: **uv**
@@ -24,7 +24,7 @@ Prefer using existing repo commands:
 - Prefer small, reviewable diffs; avoid drive-by refactors.
 - Call out assumptions and tradeoffs briefly; propose the smallest acceptable change before suggesting broader refactors.
 - Fix root causes (don’t paper over symptoms) and keep behavior/backward-compatibility unless asked otherwise.
-- Follow existing patterns and naming in `python_try/`; avoid introducing new abstractions unless they pay for themselves.
+- Follow existing patterns and naming in `src/python_try/`; avoid introducing new abstractions unless they pay for themselves.
 - Validate changes using repo tooling: `uv run tox -e lint,type,py314` (or `make check`).
 - When changing behavior, add/adjust pytest coverage for the relevant branches.
 

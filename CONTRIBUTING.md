@@ -114,6 +114,8 @@ tox
 This requires you to have multiple versions of python installed.
 This step is also triggered in the CI/CD pipeline, so you could also choose to skip this step locally.
 
+**Note on docs environments:** The `docs` and `docs-test` tox environments install the package in editable mode (`package = editable`) within their isolated environment. This ensures `mkdocstrings` can import `python_try` when building documentation, both locally and in CI. Without this, mkdocs would fail to resolve the module even if installed at the workflow level.
+
 10. Commit your changes and push your branch to GitHub:
 
 ```bash
