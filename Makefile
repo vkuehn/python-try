@@ -34,7 +34,12 @@ docker-build: ## Build Docker container from current project state
 
 .PHONY: init-project
 init-project: ## Nuke old git history and start a fresh project with new origin
-	@uv run python scripts/init_new_project.py
+	@read -p "🔗 Enter new project name: " NEW_NAME; \
+	if [ -z "$$NEW_NAME" ]; then \
+		echo "❌ Error: No project name provided"; \
+		exit 1; \
+	fi; \
+	bash scripts/rename_project.sh "$$NEW_NAME"
 
 .PHONY: install
 install: ## Install the uv environment
