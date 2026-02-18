@@ -40,13 +40,13 @@ def _update_pyproject_toml(config: ProjectConfig, project_root: Path) -> None:
     ----------
     config : ProjectConfig
         Configuration object containing all project metadata.
+    project_root : Path
+        The root directory of the project.
     """
     pyproject_file = project_root / "pyproject.toml"
-    with open(pyproject_file) as file:
-        pyproject_data = tomlkit.load(file)
+    pyproject_data = tomlkit.loads(pyproject_file.read_text())
 
     # Update the project owner, version, and description
-
     authors_array = tomlkit.array()
     for author in config.authors:
         inline_table = tomlkit.inline_table()
@@ -67,8 +67,7 @@ def _update_pyproject_toml(config: ProjectConfig, project_root: Path) -> None:
     pyproject_data["tool"]["coverage"]["run"]["source"] = [f"src/{config.name}"]
 
     # Write the updated data back to the pyproject.toml file
-    with open(pyproject_file, "w") as file:
-        tomlkit.dump(pyproject_data, file)
+    pyproject_file.write_text(tomlkit.dumps(pyproject_data))
 
 
 def _rename_package_directory(old_name: str, new_name: str, project_root: Path) -> None:
@@ -112,6 +111,154 @@ def _update_devcontainer(old_name: str, new_name: str, project_root: Path) -> No
     content = content.replace(f"/workspaces/{old_name}", f"/workspaces/{new_name}")
     devcontainer_file.write_text(content)
     print(f"🐳 Updated devcontainer.json: {old_name} -> {new_name}")
+
+
+def _update_readme(old_name_dash: str, new_name_dash: str, project_root: Path) -> None:
+    """Update project name references in README.md.
+
+    Parameters
+    ----------
+    old_name_dash : str
+        The old project name with dashes (e.g., python-try).
+    new_name_dash : str
+        The new project name with dashes.
+    project_root : Path
+        The root directory of the project.
+    """
+    readme_file = project_root / "README.md"
+    if not readme_file.exists():
+        return
+
+    content = readme_file.read_text()
+    content = content.replace(f"# {old_name_dash}", f"# {new_name_dash}")
+    content = content.replace("python-try/", f"{new_name_dash}/")
+    content = content.replace(old_name_dash, new_name_dash)
+
+    readme_file.write_text(content)
+    print("📖 Updated README.md")
+
+
+def _update_mkdocs_yml(old_name_dash: str, new_name_dash: str, project_root: Path) -> None:
+    """Update site name and URLs in mkdocs.yml.
+
+    Parameters
+    ----------
+    old_name_dash : str
+        The old project name with dashes.
+    new_name_dash : str
+        The new project name with dashes.
+    project_root : Path
+        The root directory of the project.
+    """
+    mkdocs_file = project_root / "mkdocs.yml"
+    if not mkdocs_file.exists():
+        return
+
+    content = mkdocs_file.read_text()
+    content = content.replace(f"site_name: {old_name_dash}", f"site_name: {new_name_dash}")
+    content = content.replace("/python-try", f"/{new_name_dash}")
+    content = content.replace(f"/{old_name_dash}", f"/{new_name_dash}")
+
+    mkdocs_file.write_text(content)
+    print("🌐 Updated mkdocs.yml")
+
+
+def _update_dockerfile(old_name: str, new_name: str, project_root: Path) -> None:
+    """Update package import in Dockerfile.
+
+    Parameters
+    ----------
+    old_name : str
+        The old package name with underscores.
+    new_name : str
+        The new package name with underscores.
+    project_root : Path
+        The root directory of the project.
+    """
+    dockerfile = project_root / "Dockerfile"
+    if not dockerfile.exists():
+        return
+
+    content = dockerfile.read_text()
+    content = content.replace(f"from {old_name}.main", f"from {new_name}.main")
+
+    dockerfile.write_text(content)
+    print("🐳 Updated Dockerfile")
+
+
+def _update_docker_compose(old_name_dash: str, new_name_dash: str, project_root: Path) -> None:
+    """Update project name references in docker-compose.yml.
+
+    Parameters
+    ----------
+    old_name_dash : str
+        The old project name with dashes.
+    new_name_dash : str
+        The new project name with dashes.
+    project_root : Path
+        The root directory of the project.
+    """
+    docker_compose_file = project_root / "docker-compose.yml"
+    if not docker_compose_file.exists():
+        return
+
+    content = docker_compose_file.read_text()
+    content = content.replace(f"image: {old_name_dash}:latest", f"image: {new_name_dash}:latest")
+    content = content.replace(f"container_name: {old_name_dash}-app", f"container_name: {new_name_dash}-app")
+    content = content.replace(f"container_name: {old_name_dash}-dev", f"container_name: {new_name_dash}-dev")
+    content = content.replace(f"/workspaces/{old_name_dash}", f"/workspaces/{new_name_dash}")
+    content = content.replace(f"{old_name_dash}-venv", f"{new_name_dash}-venv")
+    content = content.replace(f"{old_name_dash}-uv-cache", f"{new_name_dash}-uv-cache")
+
+    docker_compose_file.write_text(content)
+    print("🐳 Updated docker-compose.yml")
+
+
+def _update_makefile(old_name_dash: str, new_name_dash: str, project_root: Path) -> None:
+    """Update Docker image tag in Makefile.
+
+    Parameters
+    ----------
+    old_name_dash : str
+        The old project name with dashes.
+    new_name_dash : str
+        The new project name with dashes.
+    project_root : Path
+        The root directory of the project.
+    """
+    makefile = project_root / "Makefile"
+    if not makefile.exists():
+        return
+
+    content = makefile.read_text()
+    content = content.replace(f"-t {old_name_dash}", f"-t {new_name_dash}")
+
+    makefile.write_text(content)
+    print("🏗️  Updated Makefile")
+
+
+def _update_tox_ini(old_name: str, new_name: str, project_root: Path) -> None:
+    """Update package paths in tox.ini.
+
+    Parameters
+    ----------
+    old_name : str
+        The old package name with underscores.
+    new_name : str
+        The new package name with underscores.
+    project_root : Path
+        The root directory of the project.
+    """
+    tox_file = project_root / "tox.ini"
+    if not tox_file.exists():
+        return
+
+    content = tox_file.read_text()
+    content = content.replace(f"src/{old_name}", f"src/{new_name}")
+    content = content.replace(f"./{old_name}", f"./{new_name}")
+
+    tox_file.write_text(content)
+    print("⚙️  Updated tox.ini")
 
 
 def _get_user_input(user_email: str, user_name: str) -> ProjectConfig:
@@ -187,7 +334,7 @@ def init_new_project() -> None:
     print("📦 Creating initial commit...")
     subprocess.run([git, "add", "."], cwd=project_root, check=True)  # noqa: S603
     subprocess.run(  # noqa: S603
-        [git, "commit", "-m", "Initial commit from python-try template"],
+        [git, "commit", "-m", f"Initial commit from {config.name} template"],
         cwd=project_root,
         check=True,
     )
@@ -205,8 +352,17 @@ def init_new_project() -> None:
     print("📝 Updating pyproject.toml with new project metadata...")
     _update_pyproject_toml(config=config, project_root=project_root)
 
-    # 8. Update devcontainer configuration
-    _update_devcontainer(old_name="python-try", new_name=config.name, project_root=project_root)
+    # 8. Update all template references to old project names
+    old_name_dash = "python-try"
+    new_name_dash = config.name.replace("_", "-")
+
+    _update_devcontainer(old_name="python-try", new_name=new_name_dash, project_root=project_root)
+    _update_readme(old_name_dash=old_name_dash, new_name_dash=new_name_dash, project_root=project_root)
+    _update_mkdocs_yml(old_name_dash=old_name_dash, new_name_dash=new_name_dash, project_root=project_root)
+    _update_dockerfile(old_name="python_try", new_name=config.name, project_root=project_root)
+    _update_docker_compose(old_name_dash=old_name_dash, new_name_dash=new_name_dash, project_root=project_root)
+    _update_makefile(old_name_dash=old_name_dash, new_name_dash=new_name_dash, project_root=project_root)
+    _update_tox_ini(old_name="python_try", new_name=config.name, project_root=project_root)
 
     # Re-run your custom hook setup script
     setup_hook = project_root / "scripts" / "setup_hook_commit_message.py"
