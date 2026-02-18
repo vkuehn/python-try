@@ -1,29 +1,40 @@
 [project]
 name = "python_try"
-version = "0.0.2"
+version = "0.0.5"
 description = "This is a template repository for Python projects"
 authors = [{ name = "Volker Kuehn", email = "vkuehn@more-machines.org" }]
 requires-python = ">=3.14,<4.0"
 readme = "README.md"
-dependencies = [
-    "ruff>=0.9.0,<1.0.0",
-    "pytest>=8.2.2,<9.0.0",
-    "pytest-cov>=5.0.0,<6.0.0",
-    "mkdocs>=1.6.1,<2.0.0",
-    "mkdocs-material>=9.5.21,<10.0.0",
-    "mkdocstrings[python]>=1.0.0,<2.0.0",
-    "tox>=4.15.0,<5.0.0",
-    "mypy>=1.10.0,<2.0.0",
-    "pip>=24.0",
-    "mkdocs-autorefs>=1.4.3",
-    "tox-uv>=1.29.0",
+dependencies = []  # this is a template project
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+    "python-semantic-release>=9.0.0",
+    "ruff>=0.9.0",
+    "mypy>=1.10.0",
     "pylint>=4.0.2",
-    "toml>=0.10.2",
+    "tox>=4.15.0",
+    "tox-uv>=1.29.0",
+]
+test = [
+    "pytest>=8.2.2",
+    "pytest-cov>=5.0.0",
+]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.5.21",
+    "mkdocstrings[python]>=1.0.0",
+    "mkdocs-autorefs>=1.4.3",
 ]
 
 [project.urls]
 Documentation = "https://vkuehn.github.io/python-try/"
 Repository = "https://github.com/vkuehn/python-try"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [tool.uv]
 package = true # Enable package management (default is true)
@@ -76,18 +87,9 @@ upload_to_pypi = false
 changelog_file = "CHANGELOG.md"
 build_command = "uv build --out-dir dist/"
 
-[tool.coverage.report]
-skip_empty = true
-
 [tool.coverage.run]
 branch = true
 source = ["src/python_try"]
-
-[dependency-groups]
-dev = [
-    "pre-commit>=4.2.0",
-    "python-semantic-release>=9.0.0,<10.0.0",
-]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101"]

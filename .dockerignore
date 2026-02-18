@@ -1,63 +1,33 @@
 # Git
 .git
 .gitignore
-.gitattributes
 
-# Python
+# Python / Environment
+.venv
 __pycache__
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-.venv/
-ENV/
-*.egg-info/
-.eggs/
-dist/
-build/
-
-# Testing and coverage
-.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+.tox
+.mypy_cache
+.pytest_cache
 .coverage
-.coverage.*
-htmlcov/
-.tox/
-.mypy_cache/
-.ruff_cache/
-coverage.xml
+htmlcov
+dist
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
+# VS Code
+.vscode
+.devcontainer
+
+# Environment variables (Sicherheitsrisiko im Image!)
+.env
+.dev.env
 
 # Documentation
-docs/
-site/
+docs
+site
 mkdocs.yml
 
-# CI/CD
-.github/
-
-# Development
-.devcontainer/
-.pre-commit-config.yaml
-.editorconfig
-Dockerfile
-docker-compose.yml
-.dockerignore
-
-# Project specific
-README.md
-CONTRIBUTING.md
-CHANGELOG.md
-LICENSE
-Makefile
+# Tooling configs (optional, aber im Final Image oft unnötig)
 tox.ini
-requirements.txt
-scripts/
+Makefile
