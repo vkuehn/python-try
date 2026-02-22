@@ -120,7 +120,7 @@ def _update_readme(old_name_dash: str, new_name_dash: str, project_root: Path) -
     Parameters
     ----------
     old_name_dash : str
-        The old project name with dashes (e.g., python-try).
+        The old project name with dashes.
     new_name_dash : str
         The new project name with dashes.
     project_root : Path
@@ -132,7 +132,7 @@ def _update_readme(old_name_dash: str, new_name_dash: str, project_root: Path) -
 
     content = readme_file.read_text()
     content = content.replace(f"# {old_name_dash}", f"# {new_name_dash}")
-    content = content.replace("python-try/", f"{new_name_dash}/")
+    content = content.replace(f"{old_name_dash}/", f"{new_name_dash}/")
     content = content.replace(old_name_dash, new_name_dash)
 
     readme_file.write_text(content)
@@ -157,7 +157,7 @@ def _update_mkdocs_yml(old_name_dash: str, new_name_dash: str, project_root: Pat
 
     content = mkdocs_file.read_text()
     content = content.replace(f"site_name: {old_name_dash}", f"site_name: {new_name_dash}")
-    content = content.replace("/python-try", f"/{new_name_dash}")
+    content = content.replace(f"/{old_name_dash}", f"/{new_name_dash}")
     content = content.replace(f"/{old_name_dash}", f"/{new_name_dash}")
 
     mkdocs_file.write_text(content)
@@ -368,7 +368,7 @@ def init_new_project(project_name: str | None = None) -> None:
     old_name_dash = "python-try"
     new_name_dash = config.name.replace("_", "-")
 
-    _update_devcontainer(old_name="python-try", new_name=new_name_dash, project_root=project_root)
+    _update_devcontainer(old_name=old_name_dash, new_name=new_name_dash, project_root=project_root)
     _update_readme(old_name_dash=old_name_dash, new_name_dash=new_name_dash, project_root=project_root)
     _update_mkdocs_yml(old_name_dash=old_name_dash, new_name_dash=new_name_dash, project_root=project_root)
     _update_dockerfile(old_name="python_try", new_name=config.name, project_root=project_root)
@@ -389,7 +389,7 @@ def init_new_project(project_name: str | None = None) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Initialize a new project from the python-try template.")
+    parser = argparse.ArgumentParser(description="Initialize a new project from the template.")
     parser.add_argument(
         "--name",
         "-n",

@@ -73,6 +73,10 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 # ToDo
 
 - remove all python_try left overs in code and documentation and config files
+    - index.md
+    - Contribution.md
+    - init_new_project.py
+    - remove ./src/python_try.egg-info folder
 - rename complete folder and subfolder
 - recreate .venv folder
 - Ensure pipelines are stable in all situations
