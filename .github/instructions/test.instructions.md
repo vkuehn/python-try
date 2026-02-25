@@ -60,9 +60,9 @@ Follow project conventions in @workspace.
 ## 🔍 Pre-commit Validation
 
 Before finalizing code:
-- Run `ruff check src/python_try/`
-- Run `mypy src/python_try/`
-- Run `pytest --cov=src/python_try tests/`
+- Run `make check` to execute formatting, linting, type checking, and tests via tox/uv.
+- Optionally run `make test` for a focused test run (tox `py314` environment).
+- Optionally run `make docs-test` if documentation changes are included.
 
 ## 🎯 Quality Gates
 
