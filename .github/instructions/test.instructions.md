@@ -1,4 +1,4 @@
-# Python Development Instructions - python-try/src
+# Python Development Instructions - src/python_try/
 
 ## 🎯 Context
 - **Project:** python-try template repository
