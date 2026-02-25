@@ -4,7 +4,7 @@
 - **Project:** python-try template repository
 - **Python Version:** >= 3.14
 - **Code Quality:** Ruff, Mypy, Pylint, Pre-commit hooks
-- **Testing:** Pytest with coverage of at least 80%
+- **Testing:** Pytest with coverage of at least 90%
 
 ## 🔄 Mandatory Workflow: The 3-Step Loop
 
