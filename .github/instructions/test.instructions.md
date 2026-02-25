@@ -34,7 +34,7 @@ For all Python code changes in `src/python_try/`:
 - Follow Ruff rules (line length: 120 chars).
 - Avoid complexity (mccabe, simplify comprehensions).
 - No security antipatterns (bandit S* rules).
-- Prefer explicit over implicit (no lambda assignments).
+- Prefer explicit over implicit (e.g., prefer named functions over lambda assignments, but lambda assignments are allowed when they improve clarity).
 
 ### Testing
 - Write pytest tests in `/tests/` for all new functionality.
