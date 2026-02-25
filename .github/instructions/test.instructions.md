@@ -70,4 +70,4 @@ All code must pass:
 - ✅ Ruff linting (no errors)
 - ✅ Mypy type checking (no errors)
 - ✅ Pytest tests (100% pass rate)
-- ✅ Coverage threshold maintained by at least 80% of code
+- ✅ Coverage threshold maintained by at least 90% of code
