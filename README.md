@@ -73,7 +73,7 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
 # ToDo
 
 - remove all python_try left overs in code and documentation and config files
-    - codepilot instructions
+    - Copilot instructions
     - index.md
     - CONTRIBUTING.md
     - init_new_project.py
