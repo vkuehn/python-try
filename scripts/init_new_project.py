@@ -158,7 +158,6 @@ def _update_mkdocs_yml(old_name_dash: str, new_name_dash: str, project_root: Pat
     content = mkdocs_file.read_text()
     content = content.replace(f"site_name: {old_name_dash}", f"site_name: {new_name_dash}")
     content = content.replace(f"/{old_name_dash}", f"/{new_name_dash}")
-    content = content.replace(f"/{old_name_dash}", f"/{new_name_dash}")
 
     mkdocs_file.write_text(content)
     print("🌐 Updated mkdocs.yml")
