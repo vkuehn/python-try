@@ -54,15 +54,24 @@ install: ## Install the uv environment
 	@uv run pre-commit install
 	@uv run ./scripts/setup_hook_commit_message.py
 
-
 .PHONY: update
-update: ## Run update of dependencies
-	@echo "🚀 Upgrading dependencies in uv.lock"
+update: ## Safe Update: Refresh lockfile within pyproject.toml constraints
+	@echo "🚀 Upgrading dependencies in uv.lock..."
 	@uv lock --upgrade
-	@echo "🚀 Updating project with uv"
+	@echo "🚀 Syncing project environment..."
 	@uv sync --all-groups
-	@echo "🚀 make sure a requirements is upgraded also"
+	@echo "🚀 Exporting frozen requirements.txt..."
 	@uv export --format requirements.txt --frozen --no-hashes --no-emit-project --output-file requirements.txt
+	@echo "✅ Safe update complete."
+
+.PHONY: upgrade
+upgrade: ## Major Upgrade: Bump pyproject.toml constraints to absolute latest
+	@echo "🚀 Bumping all pyproject.toml constraints to latest..."
+	@# This extracts package names from [project] dependencies and forces uv to add their latest versions
+	@python -c "import tomllib; deps = tomllib.load(open('pyproject.toml', 'rb')).get('project', {}).get('dependencies', []); pkgs = [d.split('=')[0].split('<')[0].split('>')[0].split('~')[0].strip() for d in deps]; print(' '.join([f'{p}@latest' for p in pkgs if p]))" | xargs -n 1 uv add
+	@echo "🚀 Project file rewritten. Now running standard update..."
+	@$(MAKE) update
+	@echo "🚨 WARNING: Major versions may have been bumped. Please run your test suite!"
 
 .PHONY: test
 test: install ## Test the code with pytest (installs dependencies if needed)

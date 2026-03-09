@@ -4,13 +4,13 @@ annotated-types==0.7.0
     # via pydantic
 astroid==4.0.4
     # via pylint
-cachetools==7.0.2
+cachetools==7.0.4
     # via tox
 certifi==2026.2.25
     # via requests
 cfgv==3.5.0
     # via pre-commit
-charset-normalizer==3.4.4
+charset-normalizer==3.4.5
     # via requests
 click==8.1.8
     # via
@@ -72,7 +72,7 @@ packaging==26.0
     #   tox-uv-bare
 pathspec==1.0.4
     # via mypy
-platformdirs==4.9.2
+platformdirs==4.9.4
     # via
     #   pylint
     #   python-discovery
@@ -90,7 +90,7 @@ pygments==2.19.2
 pylint==4.0.5
 pyproject-api==1.10.0
     # via tox
-python-discovery==1.1.0
+python-discovery==1.1.1
     # via virtualenv
 python-gitlab==6.5.0
     # via python-semantic-release
@@ -106,16 +106,18 @@ requests-toolbelt==1.0.0
     # via python-gitlab
 rich==14.3.3
     # via python-semantic-release
-ruff==0.15.4
+ruff==0.15.5
 shellingham==1.5.4
     # via python-semantic-release
-smmap==5.0.2
+smmap==5.0.3
     # via gitdb
+tomli-w==1.2.0
+    # via tox
 tomlkit==0.13.3
     # via
     #   pylint
     #   python-semantic-release
-tox==4.47.3
+tox==4.49.0
     # via tox-uv-bare
 tox-uv==1.33.1
 tox-uv-bare==1.33.1
@@ -130,11 +132,11 @@ typing-inspection==0.4.2
     # via pydantic
 urllib3==2.6.3
     # via requests
-uv==0.10.8
+uv==0.10.9
     # via tox-uv
 virtualenv==21.1.0
     # via
     #   pre-commit
     #   tox
-wrapt==2.1.1
+wrapt==2.1.2
     # via deprecated
