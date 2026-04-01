@@ -4,13 +4,13 @@ annotated-types==0.7.0
     # via pydantic
 astroid==4.0.4
     # via pylint
-cachetools==7.0.4
+cachetools==7.0.5
     # via tox
 certifi==2026.2.25
     # via requests
 cfgv==3.5.0
     # via pre-commit
-charset-normalizer==3.4.5
+charset-normalizer==3.4.6
     # via requests
 click==8.1.8
     # via
@@ -31,7 +31,7 @@ distlib==0.4.0
     # via virtualenv
 dotty-dict==1.3.1
     # via python-semantic-release
-filelock==3.25.0
+filelock==3.25.2
     # via
     #   python-discovery
     #   tox
@@ -40,7 +40,7 @@ gitdb==4.0.12
     # via gitpython
 gitpython==3.1.46
     # via python-semantic-release
-identify==2.6.17
+identify==2.6.18
     # via pre-commit
 idna==3.11
     # via requests
@@ -60,7 +60,7 @@ mccabe==0.7.0
     # via pylint
 mdurl==0.1.2
     # via markdown-it-py
-mypy==1.19.1
+mypy==1.20.0
 mypy-extensions==1.1.0
     # via mypy
 nodeenv==1.10.0
@@ -85,19 +85,21 @@ pydantic==2.12.5
     # via python-semantic-release
 pydantic-core==2.41.5
     # via pydantic
-pygments==2.19.2
+pygments==2.20.0
     # via rich
 pylint==4.0.5
 pyproject-api==1.10.0
     # via tox
-python-discovery==1.1.1
-    # via virtualenv
+python-discovery==1.2.1
+    # via
+    #   tox
+    #   virtualenv
 python-gitlab==6.5.0
     # via python-semantic-release
 python-semantic-release==10.5.3
 pyyaml==6.0.3
     # via pre-commit
-requests==2.32.5
+requests==2.33.1
     # via
     #   python-gitlab
     #   python-semantic-release
@@ -106,7 +108,7 @@ requests-toolbelt==1.0.0
     # via python-gitlab
 rich==14.3.3
     # via python-semantic-release
-ruff==0.15.5
+ruff==0.15.8
 shellingham==1.5.4
     # via python-semantic-release
 smmap==5.0.3
@@ -117,10 +119,10 @@ tomlkit==0.13.3
     # via
     #   pylint
     #   python-semantic-release
-tox==4.49.0
+tox==4.52.0
     # via tox-uv-bare
-tox-uv==1.33.1
-tox-uv-bare==1.33.1
+tox-uv==1.34.0
+tox-uv-bare==1.34.0
     # via tox-uv
 typing-extensions==4.15.0
     # via
@@ -132,9 +134,9 @@ typing-inspection==0.4.2
     # via pydantic
 urllib3==2.6.3
     # via requests
-uv==0.10.9
+uv==0.11.2
     # via tox-uv
-virtualenv==21.1.0
+virtualenv==21.2.0
     # via
     #   pre-commit
     #   tox
