@@ -20,9 +20,11 @@ from enum import Enum
 # Conversion constants
 # ---------------------------------------------------------------------------
 
-_MS_TO_KNOTS: float = 1.94384449
+# 1 knot = 1 nautical mile / hour = 1852 m / 3600 s (exact by definition)
+_MS_TO_KNOTS: float = 3600.0 / 1852.0
 _MS_TO_KMH: float = 3.6
-_M_TO_FT: float = 3.28084
+# 1 international foot = 0.3048 m (exact by definition)
+_M_TO_FT: float = 1.0 / 0.3048
 _K_TO_C_OFFSET: float = 273.15
 
 
