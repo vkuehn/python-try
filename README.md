@@ -15,7 +15,8 @@ It is based on standard best practices for modern Python development.
 ## Project Structure
 
 Uses standard **src-layout**:
-```
+
+```text
 python-try/
 ├── src/python_try/     # Package source code
 ├── tests/              # Test files
@@ -26,30 +27,34 @@ python-try/
 
 To start a new project using this template:
 
-1.  **Clone the repository** (or download and extract the ZIP):
+1. **Clone the repository** (or download and extract the ZIP):
+
     ```bash
     git clone [https://github.com/vkuehn/python-try.git](https://github.com/vkuehn/python-try.git) my-new-project
     cd my-new-project
     ```
 
-2.  **Install dependencies**:
+2. **Install dependencies**:
+
     ```bash
     make install
     ```
 
-3.  **Initialize your new project**:
+3. **Initialize your new project**:
     This command will remove the template's git history, initialize a new git repository, and optionally link it to your new remote origin.
+
     ```bash
     make init-project
     ```
 
-4.  **Rename and Configure**:
+4. **Rename and Configure**:
     - Rename the package folder `src/python_try` to your project name.
     - Update `pyproject.toml` with your project's name, version, and authors.
     - Update `mkdocs.yml` with your project name and repository URL.
     - Push your first commit: `git push -u origin main`
 
 Make sure:
+
 - that [GitHub pages](https://pages.github.com/) is enabled for your repo in `Settings > Pages`.
 - that you give the GITHUB_TOKEN write permission.
   Go to `Settings > Actions > General > Workflow Permissions` and select **Read and write permissions**.
@@ -57,7 +62,7 @@ Make sure:
 You are now ready to start development on your project!
 The CI/CD pipeline will be triggered when you open a pull request, merge to main, or when you create a new release.
 
-# Features
+## Features
 
 - **Makefile** with handy options during development (`make help`)
 - **MkDocs** for source code documentation (see `mkdocs.yml`)
@@ -70,33 +75,18 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
     - Publishes documentation on GitHub Pages
     - Uses `python-semantic-release` to create new releases automatically
 
-# ToDo
+## ToDo
 
 - remove all python_try left overs in code and documentation and config files
-    - Copilot instructions
-    - index.md
-    - CONTRIBUTING.md
-    - init_new_project.py
-    - remove ./src/python_try.egg-info folder
-    - tox.ini
-    - test_main.py
-    - __init__.py
-    - mkdocs.yml
+  index.md,CONTRIBUTING.md,init_new_project.py,tox.ini,test_main.py,_init__.py,mkdocs.yml
 - rename complete folder and subfolder
+- remove ./src/python_try.egg-info folder
 - recreate .venv folder
 - Ensure pipelines are stable in all situations
 - Refine release scripts
 
-# Devcontainer
-
-**VS Code**: Reopen in Container
-
 **Docker Compose**:
+
 ```bash
 docker-compose up dev
-```
-
-**Podman**:
-```bash
-podman run -it --rm -v "$(pwd):/workspaces/python-try:Z" -w /workspaces/python-try mcr.microsoft.com/devcontainers/python:3.14-bookworm bash
 ```
