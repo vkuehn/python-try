@@ -67,8 +67,14 @@ update: ## Safe Update: Refresh lockfile within pyproject.toml constraints
 .PHONY: upgrade
 upgrade: ## Major Upgrade: Bump pyproject.toml constraints to absolute latest
 	@echo "🚀 Bumping all pyproject.toml constraints to latest..."
-	@# This extracts package names from [project] dependencies and forces uv to add their latest versions
-	@python -c "import tomllib; deps = tomllib.load(open('pyproject.toml', 'rb')).get('project', {}).get('dependencies', []); pkgs = [d.split('=')[0].split('<')[0].split('>')[0].split('~')[0].strip() for d in deps]; print(' '.join([f'{p}@latest' for p in pkgs if p]))" | xargs -n 1 uv add
+	@# Extract package names from [project] dependencies and bump each to latest.
+	@pkgs="$$(uv run python -c "import re, tomllib; deps = tomllib.load(open('pyproject.toml', 'rb')).get('project', {}).get('dependencies', []); names = [re.split(r'[<>=!~\\[]', d, maxsplit=1)[0].strip() for d in deps if d.strip()]; print(' '.join(f'{n}@latest' for n in names if n))")"; \
+	if [ -n "$$pkgs" ]; then \
+		echo "🚀 Upgrading project dependencies: $$pkgs"; \
+		printf "%s\\n" "$$pkgs" | xargs -n 1 uv add; \
+	else \
+		echo "ℹ️ No [project] dependencies found; skipping constraint rewrite."; \
+	fi
 	@echo "🚀 Project file rewritten. Now running standard update..."
 	@$(MAKE) update
 	@echo "🚨 WARNING: Major versions may have been bumped. Please run your test suite!"
