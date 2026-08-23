@@ -11,7 +11,7 @@ They are tool-agnostic and intended for any AI coding assistant.
 - Tooling:
   - Dependency management / runner: **uv**
   - CI/local orchestration: **tox** (often via `uv run tox ...`)
-  - Formatting/lint: **ruff** (+ **pylint** in `tox -e lint`)
+  - Formatting/lint: **ruff** (`tox -e lint`)
   - Type checking: **mypy** (strict settings in `pyproject.toml`)
   - Docs: **mkdocs**
 
