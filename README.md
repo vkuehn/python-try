@@ -75,6 +75,37 @@ The CI/CD pipeline will be triggered when you open a pull request, merge to main
     - Publishes documentation on GitHub Pages
     - Uses `python-semantic-release` to create new releases automatically
 
+## Development Workflow
+
+This template uses a single source of truth for quality checks: tox is the runner
+for tests, linting, type checking and documentation builds. The Makefile targets are
+thin wrappers around `uv run tox -e <env>`, so what you run locally is exactly what CI
+runs. uv manages dependencies and creates the locked, isolated environments tox uses.
+
+tox is kept intentionally minimal (just the quality gates). More advanced tox usage,
+such as version matrices, plugins or extra environments, is left for you to add once
+you have started your own project from this template.
+
+Common commands (see `make help` for the full list and an explanation):
+
+```bash
+make check   # lint + type + tests (read-only, mirrors CI)
+make fix     # ruff format + autofix (mutates source files)
+make test    # run the test suite (pytest + coverage)
+make docs    # build the documentation
+```
+
+The tox environments themselves:
+
+- `py314` (default): pytest with doctests and coverage
+- `lint`: ruff check (read-only)
+- `type`: mypy
+- `fix`: ruff format and autofix (mutating; kept separate from `check`)
+- `docs` / `docs-test`: mkdocs build (strict for `docs-test`)
+
+Build and release use uv directly (`uv build`), matching the semantic-release
+`build_command`, so no tox environment is needed for packaging.
+
 ## ToDo
 
 - remove all python_try left overs in code and documentation and config files
