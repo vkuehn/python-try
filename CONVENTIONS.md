@@ -15,9 +15,10 @@ They are tool-agnostic and intended for any AI coding assistant.
   - Type checking: **mypy** (strict settings in `pyproject.toml`)
   - Docs: **mkdocs**
 
-Prefer using existing repo commands:
+Prefer using existing repo commands (thin wrappers around `uv run tox -e ...`):
 - `make test` (runs `tox -e py314`)
-- `make check` (runs formatting/lint/type/test envs)
+- `make check` (runs `tox -e lint,type,py314`; read-only, mirrors CI)
+- `make fix` (runs `tox -e fix`; formats/autofixes, mutates source)
 - `make docs` / `make docs-test`
 
 ## Defaults (how to work in this repo)
