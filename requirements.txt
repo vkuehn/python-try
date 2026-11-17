@@ -2,38 +2,38 @@
 #    uv export --format requirements.txt --frozen --no-hashes --no-emit-project --output-file requirements.txt
 annotated-types==0.8.0
     # via pydantic
-ast-serialize==0.12.1
+ast-serialize==0.13.1
     # via mypy
-cachetools==7.2.1
+cachetools==8.0.0
     # via tox
-certifi==2026.7.22
+certifi==2026.10.23
     # via requests
 cfgv==3.5.0
     # via pre-commit
 charset-normalizer==3.5.2
     # via requests
-click==8.5.0
+click==8.5.1
     # via
     #   click-option-group
     #   python-semantic-release
-click-option-group==0.5.9
+click-option-group==0.5.10
     # via python-semantic-release
 colorama==0.4.6
     # via tox
 deprecated==1.3.1
     # via python-semantic-release
-distlib==0.4.3
+distlib==0.4.4
     # via virtualenv
 dotty-dict==1.3.1
     # via python-semantic-release
-filelock==4.0.12
+filelock==4.2.11
     # via
     #   python-discovery
     #   tox
     #   virtualenv
 gitdb==4.0.12
     # via gitpython
-gitpython==3.2.0
+gitpython==3.2.1
     # via python-semantic-release
 identify==2.6.20
     # via pre-commit
@@ -43,16 +43,16 @@ jinja2==3.1.6
     # via python-semantic-release
 librt==0.16.0 ; platform_python_implementation != 'PyPy'
     # via mypy
-markdown-it-py==4.2.0
+markdown-it-py==4.3.0
     # via rich
 markupsafe==3.0.4
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
-mypy==2.4.0
-mypy-extensions==1.1.0
+mypy==2.4.1
+mypy-extensions==1.2.0
     # via mypy
-nodeenv==1.11.0
+nodeenv==1.12.0
     # via pre-commit
 packaging==26.3
     # via
@@ -62,22 +62,22 @@ packaging==26.3
     #   virtualenv
 pathspec==1.1.1
     # via mypy
-platformdirs==4.12.4
+platformdirs==4.14.5
     # via
     #   tox
     #   virtualenv
-pluggy==1.6.0
+pluggy==1.7.0
     # via tox
-pre-commit==4.6.2
-pydantic==2.13.5
+pre-commit==4.7.0
+pydantic==2.14.3
     # via python-semantic-release
-pydantic-core==2.46.5
+pydantic-core==2.50.4
     # via pydantic
 pygments==2.21.0
     # via rich
-pyproject-api==1.11.4
+pyproject-api==1.12.5
     # via tox
-python-discovery==1.6.1
+python-discovery==1.9.5
     # via
     #   tox
     #   virtualenv
@@ -95,19 +95,19 @@ requests-toolbelt==1.0.0
     # via python-gitlab
 rich==15.0.0
     # via python-semantic-release
-ruff==0.16.10
+ruff==0.17.5
 shellingham==1.5.4
     # via python-semantic-release
 smmap==5.0.3
     # via gitdb
 tomli-w==1.2.0
     # via tox
-tomlkit==0.15.1
+tomlkit==0.15.2
     # via python-semantic-release
-tox==4.64.9
+tox==4.67.13
     # via tox-uv-bare
-tox-uv==1.36.1
-tox-uv-bare==1.36.1
+tox-uv==1.37.7
+tox-uv-bare==1.37.7
     # via tox-uv
 typing-extensions==4.16.0
     # via
@@ -115,15 +115,15 @@ typing-extensions==4.16.0
     #   pydantic
     #   pydantic-core
     #   typing-inspection
-typing-inspection==0.4.4
+typing-inspection==0.4.5
     # via pydantic
 urllib3==2.8.0
     # via requests
-uv==0.12.23
+uv==0.13.8
     # via tox-uv
-virtualenv==21.14.5
+virtualenv==21.15.7
     # via
     #   pre-commit
     #   tox
-wrapt==2.5.0
+wrapt==2.5.2
     # via deprecated
